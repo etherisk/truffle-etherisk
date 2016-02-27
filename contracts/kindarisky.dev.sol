@@ -1,4 +1,4 @@
-import "std.sol";
+import "std";
 
 contract KindaRisky is named("KindaRisky") {
     
@@ -108,10 +108,32 @@ contract KindaRisky is named("KindaRisky") {
         }
  
         // create links between countries;
+        linkNeighbors(gameId,0,1);
+        linkNeighbors(gameId,1,2);
+        linkNeighbors(gameId,1,3);
+        linkNeighbors(gameId,3,4);
+        linkNeighbors(gameId,3,5);
+        linkNeighbors(gameId,3,6);
+        linkNeighbors(gameId,3,7);
         linkNeighbors(gameId,,);
         linkNeighbors(gameId,,);
         linkNeighbors(gameId,,);
         linkNeighbors(gameId,,);
+        linkNeighbors(gameId,,);
+        linkNeighbors(gameId,,);
+        linkNeighbors(gameId,,);
+        linkNeighbors(gameId,,);
+        linkNeighbors(gameId,,);
+        linkNeighbors(gameId,,);
+        linkNeighbors(gameId,,);
+        linkNeighbors(gameId,,);
+        linkNeighbors(gameId,,);
+        linkNeighbors(gameId,,);
+        linkNeighbors(gameId,,);
+        linkNeighbors(gameId,,);
+        linkNeighbors(gameId,,);
+        linkNeighbors(gameId,,);
+
         
         // 16 countries; 25 links
         
