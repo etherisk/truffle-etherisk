@@ -97,6 +97,30 @@ contract KindaRisky is named("KindaRisky") {
         return games[gameId].players[playId];
     }
     
+    function createEurope() {
+        newGame.nbCountries = 16;
+        
+        for (uint i; i<newGame.nbCountries; i++){
+            newGame.countries[i].id = i;
+            newGame.countries[i].numArmy = 4 + i; // has to be randomized
+            newGame.countries[i].bonus = 5; // randomized
+            newGame.countries[i].lastGrowth =0; // randomized
+        }
+ 
+        // create links between countries;
+        linkNeighbors(gameId,,);
+        linkNeighbors(gameId,,);
+        linkNeighbors(gameId,,);
+        linkNeighbors(gameId,,);
+        
+        // 16 countries; 25 links
+        
+        linkNeighbors(gameId,0,1);
+        linkNeighbors(gameId,2,3);
+        linkNeighbors(gameId,1,3);
+        linkNeighbors(gameId,3,0);
+    }
+    
     /*
     Abstract of game turns:
     - move armies and resolve battles
@@ -220,7 +244,7 @@ contract KindaRisky is named("KindaRisky") {
         games[gameId].countries[countryId].owner = msg.sender;
     }    
     
-     uint register=239847293742347;
+    uint register=239847293742347;
     
     function setSeed(uint seed){
         register=seed;
@@ -255,25 +279,4 @@ contract KindaRisky is named("KindaRisky") {
              
          return (register&0x1)==1;
      }
-
-    // function getRandomNumber(uint n) returns (uint) { // so far we are going to use blk_nonce as a random seed xored with the caller address
-    //     uint register;                                // 
-    //     uint shiftOut;
-    //     for (uint i=0; i<32; i++) {
-    //     register = ((((register >> 31) 
-    //           ^ (register >> 6)   
-    //           ^ (register >> 4)   
-    //           ^ (register >> 2)   
-    //           ^ (register >> 1)   
-    //           ^ register)         
-    //           & 0x0000001)        
-    //           <<31)               
-    //           | (register >> 1);  
-    //      }
-    //     //shiftOut|= (register&0x1)
-    //     //shiftOut  1;
-    //     //return 0;
-    //     return shiftOut;
-    // }
-    
 }
