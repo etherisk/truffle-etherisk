@@ -38,6 +38,19 @@ contract KindaRisky is named("KindaRisky") {
     
     function getGameState(uint gameId) constant returns(uint) { return uint(games[gameId].state); }
     
+    function getAvailableGames() public returns(uint[10] result) {
+        uint found = 0;
+        for(uint i = 0; i < 10; i++) {
+            result[i] == -1;
+        }
+        for(uint i = nbGames ; i != 0 && found < 10; i--) {
+            if(games[i].state == CREATED) {
+                result[found] = i;
+                found++;
+            }
+        }
+    }
+    
     function join(uint gameId) public returns (uint){
         log0("joining game");
         return addPlayerToGame(gameId,msg.sender);
