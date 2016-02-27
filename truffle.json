@@ -1,7 +1,7 @@
 {
   "build": {
     "index.html": "index.html",
-    "js/": "js/",
+    "javascripts/app.js": "javascripts/app.js",
     "Development/": "Development/",
     "TemplateData/": "TemplateData/"
   },
