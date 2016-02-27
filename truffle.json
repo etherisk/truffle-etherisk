@@ -1,0 +1,12 @@
+{
+  "build": {
+    "index.html": "index.html"
+  },
+  "deploy": [
+    "KindaRisky"
+  ],
+  "rpc": {
+    "host": "localhost",
+    "port": 8545
+  }
+}
