@@ -1,4 +1,4 @@
-import "std";
+import "std.sol";
 
 contract KindaRisky is named("KindaRisky") {
     
@@ -34,26 +34,27 @@ contract KindaRisky is named("KindaRisky") {
         log0("Creating KindaRisky!");
     }
     
-    function getNumberGames() constant returns(uint) { return nbGames; }
-    
-    function getGameState(uint gameId) constant returns(uint) { return uint(games[gameId].state); }
-    
-    function getAvailableGames() public returns(uint[10] result) {
+    function getAvailableGames() public returns(int[10] result) {
         uint found = 0;
-        for(uint i = 0; i < 10; i++) {
-            result[i] == -1;
+        uint i;
+        for(i = 0; i < 10; i++) {
+            result[i] = -1;
         }
-        for(uint i = nbGames ; i != 0 && found < 10; i--) {
-            if(games[i].state == CREATED) {
-                result[found] = i;
+        for(i = nbGames ; i != 0 && found < 10; i--) {
+            if(games[i].state == GameState.CREATED) {
+                result[found] = int256(i);
                 found++;
             }
         }
     }
     
+    function getNumberGames() constant returns(uint) { return nbGames; }
+    
+    function getGameState(uint gameId) constant returns(uint) { return uint(games[gameId].state); }
+    
     function join(uint gameId) public returns (uint){
         log0("joining game");
-        return addPlayerToGame(gameId,msg.sender);
+        return addPlayerToGame(gameId,tx.origin);
     } 
     
     function startGame(uint gameId) {
@@ -68,12 +69,12 @@ contract KindaRisky is named("KindaRisky") {
         return games[gameId].nbPlayers;
     }
     
-    function createGame() public {
+    function createGame(uint numCountries) public {
         uint gameId = nbGames;
         nbGames++;
         Game newGame = games[gameId];
         
-        newGame.nbCountries = 4;
+        newGame.nbCountries = numCountries;
         
         for (uint i; i<newGame.nbCountries; i++){
             newGame.countries[i].id = i;
@@ -97,57 +98,6 @@ contract KindaRisky is named("KindaRisky") {
         return games[gameId].players[playId];
     }
     
-    function createEurope() {
-        newGame.nbCountries = 16;
-        
-        for (uint i; i<newGame.nbCountries; i++){
-            newGame.countries[i].id = i;
-            newGame.countries[i].numArmy = 4 + i; // has to be randomized
-            newGame.countries[i].bonus = 5; // randomized
-            newGame.countries[i].lastGrowth =0; // randomized
-        }
- 
-        // create links between countries;
-        linkNeighbors(gameId,0,1);
-        linkNeighbors(gameId,1,2);
-        linkNeighbors(gameId,1,3);
-        linkNeighbors(gameId,3,4);
-        linkNeighbors(gameId,3,5);
-        linkNeighbors(gameId,3,6);
-        linkNeighbors(gameId,3,7);
-        linkNeighbors(gameId,,);
-        linkNeighbors(gameId,,);
-        linkNeighbors(gameId,,);
-        linkNeighbors(gameId,,);
-        linkNeighbors(gameId,,);
-        linkNeighbors(gameId,,);
-        linkNeighbors(gameId,,);
-        linkNeighbors(gameId,,);
-        linkNeighbors(gameId,,);
-        linkNeighbors(gameId,,);
-        linkNeighbors(gameId,,);
-        linkNeighbors(gameId,,);
-        linkNeighbors(gameId,,);
-        linkNeighbors(gameId,,);
-        linkNeighbors(gameId,,);
-        linkNeighbors(gameId,,);
-        linkNeighbors(gameId,,);
-        linkNeighbors(gameId,,);
-
-        
-        // 16 countries; 25 links
-        
-        linkNeighbors(gameId,0,1);
-        linkNeighbors(gameId,2,3);
-        linkNeighbors(gameId,1,3);
-        linkNeighbors(gameId,3,0);
-    }
-    
-    /*
-    Abstract of game turns:
-    - move armies and resolve battles
-    - generate new armies on countries
-    */
     
     function assignPlayersToCountries(uint gameId) public { // pass gameID and players
         // for each player who was joined, assign player to country in a round-robin manner
@@ -187,7 +137,7 @@ contract KindaRisky is named("KindaRisky") {
         Country from = currentGame.countries[countryId1];
         Country to = currentGame.countries[countryId2];
         
-        if (msg.sender != from.owner)  {
+        if (tx.origin != from.owner)  {
             log0("doesn't own country 1");  // the caller doesn't own both countries
             return;
         }
@@ -202,7 +152,8 @@ contract KindaRisky is named("KindaRisky") {
         }                   // countries aren't neighbours
         if (nArmy <= 0) { 
             log0("army has size 0"); 
-            return; }                                                                  // army has size 0
+            return; 
+        }                                                                  // army has size 0
         if (nArmy >= from.numArmy) {nArmy = from.numArmy - 1;}                                                                  // not enough armys available in country 1
         
         from.numArmy -= nArmy;
@@ -215,7 +166,7 @@ contract KindaRisky is named("KindaRisky") {
         Country from = currentGame.countries[countryId1];
         Country to = currentGame.countries[countryId2];
         
-        if (msg.sender != from.owner) {
+        if (tx.origin != from.owner) {
             log0("doesn't own attack country");  
             return;
         }
@@ -263,10 +214,10 @@ contract KindaRisky is named("KindaRisky") {
     
     */
     function takeCountryCheat(uint gameId, uint countryId){
-        games[gameId].countries[countryId].owner = msg.sender;
+        games[gameId].countries[countryId].owner = tx.origin;
     }    
     
-    uint register=239847293742347;
+     uint register=239847293742347;
     
     function setSeed(uint seed){
         register=seed;
@@ -301,4 +252,5 @@ contract KindaRisky is named("KindaRisky") {
              
          return (register&0x1)==1;
      }
+    
 }
