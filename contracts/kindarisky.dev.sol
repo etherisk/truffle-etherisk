@@ -1,4 +1,4 @@
-import "std.sol";
+import "std";
 
 contract KindaRisky is named("KindaRisky") {
     
