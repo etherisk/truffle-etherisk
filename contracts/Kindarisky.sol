@@ -39,7 +39,7 @@ contract Kindarisky {
         }
         for(i = nbGames ; i != 0 && found < 10; i--) {
             if(games[i-1].state == GameState.CREATED) {
-                result[found] = int256(i);
+                result[found] = int256(i-1);
                 found++;
             }
         }
