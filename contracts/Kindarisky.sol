@@ -15,6 +15,7 @@ contract Kindarisky {
     struct Game {
         uint gameID;
         address owner;
+        uint numRowsMap;
         uint nbCountries;
         uint nbPlayers;
         uint minPlayers;
@@ -29,7 +30,7 @@ contract Kindarisky {
     mapping(uint => Game) games;
 
     function KindaRisky() {
-        //log0("Creating KindaRisky!");
+        log0("Creating KindaRisky!");
     }
 
     function getAvailableGames() public returns(int[10] result) {
@@ -51,12 +52,12 @@ contract Kindarisky {
     function getGameState(uint gameId) constant returns(uint) { return uint(games[gameId].state); }
 
     function join(uint gameId) public returns (uint){
-        //log0("joining game");
+        log0("joining game");
         return addPlayerToGame(gameId,tx.origin);
     }
 
     function startGame(uint gameId) {
-        //log0("game is starting!");
+        log0("game is starting!");
         assignPlayersToCountries(gameId);
     }
 
@@ -67,12 +68,13 @@ contract Kindarisky {
         return games[gameId].nbPlayers;
     }
 
-    function createGame(uint numCountries) public {
+    function createGame(uint numRowsMap) public {
         uint gameId = nbGames;
         nbGames++;
         Game newGame = games[gameId];
 
-        newGame.nbCountries = numCountries;
+        newGame.numRowsMap = numRowsMap;
+        newGame.nbCountries = numRowsMap ** 2;
 
         for (uint i; i<newGame.nbCountries; i++){
             newGame.countries[i].id = i;
@@ -80,12 +82,6 @@ contract Kindarisky {
             newGame.countries[i].bonus = 5;
             newGame.countries[i].lastGrowth =0;
         }
-
-        // create links between countries;
-        linkNeighbors(gameId,0,1);
-        linkNeighbors(gameId,2,3);
-        linkNeighbors(gameId,1,3);
-        linkNeighbors(gameId,3,0);
     }
 
     function getNumberOfPlayers(uint gameId) returns (uint) {
@@ -110,23 +106,15 @@ contract Kindarisky {
         }
     }
 
-    function linkNeighbors(uint gameId, uint id1, uint id2) {
-        games[gameId].countries[id1].neighbors[id2] = games[gameId].countries[id2];
-        games[gameId].countries[id2].neighbors[id1] = games[gameId].countries[id1];
-        games[gameId].countries[id1].nbNeighbors++;
-        games[gameId].countries[id2].nbNeighbors++;
-    }
-
     function joinWaitingRoom(uint roomNumber) public {
 
     }
 
     function is_neighbour(uint gameId, uint countryId1, uint countryId2) returns (bool) {
-        //  mapping(uint => Country) neighbors;
-        for (uint i=0; i<games[gameId].countries[countryId1].nbNeighbors; i++) {
-            if (games[gameId].countries[countryId1].neighbors[i].id == countryId2)
-            { return true; }
-        }
+        if (countryId1 - countryId2 == 1) {return true;}
+        if (countryId2 - countryId1 == 1) {return true;}
+        if (countryId1 - countryId2 == games[gameId].numRowsMap) {return true;}
+        if (countryId2 - countryId1 == games[gameId].numRowsMap) {return true;}
         return false;
     }
 
@@ -136,20 +124,20 @@ contract Kindarisky {
         Country to = currentGame.countries[countryId2];
 
         if (tx.origin != from.owner)  {
-            //log0("doesn't own country 1");  // the caller doesn't own both countries
+            log0("doesn't own country 1");  // the caller doesn't own both countries
             return;
         }
         if (from.owner != to.owner) {
-            //log0("different owners");
+            log0("different owners");
             return;
         }
 
         if (!is_neighbour(gameId, countryId1, countryId2)) {
-            //log0("countries aren't neighbours");
+            log0("countries aren't neighbours");
             return;
         }                   // countries aren't neighbours
         if (nArmy <= 0) {
-            //log0("army has size 0");
+            log0("army has size 0");
             return;
         }                                                                  // army has size 0
         if (nArmy >= from.numArmy) {nArmy = from.numArmy - 1;}                                                                  // not enough armys available in country 1
@@ -165,39 +153,39 @@ contract Kindarisky {
         Country to = currentGame.countries[countryId2];
 
         if (tx.origin != from.owner) {
-            //log0("doesn't own attack country");
+            log0("doesn't own attack country");
             return;
         }
 
         if (!is_neighbour(gameId, countryId1, countryId2)) {
-            //log0("countries aren't neighbours");
+            log0("countries aren't neighbours");
             return;
         }
         if (nAttackers >= from.numArmy) {
             nAttackers = from.numArmy - 1;
         }
         if (nAttackers <= 0) {
-            //log0("army has size 0");
+            log0("army has size 0");
             return;
         }
 
         from.numArmy -= nAttackers;
         if(nAttackers > to.numArmy) {
-            //log0('Country conquered');
+            log0('Country conquered');
             to.owner = from.owner;
             to.numArmy = nAttackers - to.numArmy;
         }
 
         if(nAttackers == to.numArmy) {
-            //log0('Country barely defended');
+            log0('Country barely defended');
             to.numArmy = 1;
         }
 
         if(nAttackers < to.numArmy) {
-            //log0('Country defended');
+            log0('Country defended');
             to.numArmy -= nAttackers;
         }
-        //log0('Attack completed');
+        log0('Attack completed');
     }
 
     function getNumberOfArmies(uint gameId, uint countryId) returns (uint){
@@ -208,47 +196,7 @@ contract Kindarisky {
         return games[gameId].countries[countryId].owner;
     }
 
-    /*
-
-    */
     function takeCountryCheat(uint gameId, uint countryId){
         games[gameId].countries[countryId].owner = tx.origin;
     }
-
-     uint register=239847293742347;
-
-    function setSeed(uint seed){
-        register=seed;
-    }
-
-     function getRandomNumber() public returns (uint) {
-         uint shiftOut=0;
-         for (uint i=0; i<32; i++) {
-             register = ((((register /2**31)
-                   ^ (register /2**6)
-                   ^ (register /2**4)
-                   ^ (register /2**2)
-                   ^ (register /2**1)
-                   ^ register)
-                   & 0x0000001)  *2**31)
-                   | (register /2**1);
-             shiftOut=shiftOut|(register&0x1);
-             shiftOut*=2;
-         }
-         return shiftOut;
-     }
-
-     function getRandomBit() public returns (bool) {
-             register = ((((register /2**31)
-                   ^ (register /2**6)
-                   ^ (register /2**4)
-                   ^ (register /2**2)
-                   ^ (register /2**1)
-                   ^ register)
-                   & 0x0000001)  *2**31)
-                   | (register /2**1);
-
-         return (register&0x1)==1;
-     }
-
 }
