@@ -9,7 +9,7 @@
     "Kindarisky"
   ],
   "rpc": {
-    "host": "peer-1.ether.camp",
-    "port": 8082
+    "host": "127.0.0.1",
+    "port": 8545
   }
 }
