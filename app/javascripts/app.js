@@ -1,24 +1,23 @@
-
+var riskContract;
 
 function getContract() {
-  return KindaRisky.deployed();
+  return Kindarisky.at('d9e3996d5f4aece4d5878a2e2c8d986653e5532e');
 }
 
 function getAvailableGames() {
-  return getContract().getAvailableGames.call();
+  return riskContract.getAvailableGames.call();
 }
 
 window.onload = function() {
-
-  web3 = new Web3(new Web3.providers.HttpProvider("http://peer-1.ether.camp:8082/"));
-
-  getAvailableGames().then(function(games) {
-    console.log(games);
-    games.forEach(function(game) {
-      if (game != -1) {
-        var name = "Game " + game;
-        SendMessage('GameList', 'AddGame', name);
-      }
+  web3.eth.getAccounts(function(err, accs) {
+    riskContract = getContract();
+    getAvailableGames().then(function(games) {
+      games.forEach(function(game) {
+        if (game != -1) {
+          var name = "Game " + game;
+          SendMessage('GameList', 'AddGame', name);
+        }
+      });
     });
   });
 }

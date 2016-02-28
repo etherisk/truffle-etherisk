@@ -1,5 +1,4 @@
-
-contract KindaRisky {
+contract Kindarisky {
 
     struct Country {
         uint id;
@@ -30,7 +29,7 @@ contract KindaRisky {
     mapping(uint => Game) games;
 
     function KindaRisky() {
-        log0("Creating KindaRisky!");
+        //log0("Creating KindaRisky!");
     }
 
     function getAvailableGames() public returns(int[10] result) {
@@ -52,12 +51,12 @@ contract KindaRisky {
     function getGameState(uint gameId) constant returns(uint) { return uint(games[gameId].state); }
 
     function join(uint gameId) public returns (uint){
-        log0("joining game");
+        //log0("joining game");
         return addPlayerToGame(gameId,tx.origin);
     }
 
     function startGame(uint gameId) {
-        log0("game is starting!");
+        //log0("game is starting!");
         assignPlayersToCountries(gameId);
     }
 
@@ -137,27 +136,27 @@ contract KindaRisky {
         Country to = currentGame.countries[countryId2];
 
         if (tx.origin != from.owner)  {
-            log0("doesn't own country 1");  // the caller doesn't own both countries
+            //log0("doesn't own country 1");  // the caller doesn't own both countries
             return;
         }
         if (from.owner != to.owner) {
-            log0("different owners");
+            //log0("different owners");
             return;
         }
 
         if (!is_neighbour(gameId, countryId1, countryId2)) {
-            log0("countries aren't neighbours");
+            //log0("countries aren't neighbours");
             return;
         }                   // countries aren't neighbours
         if (nArmy <= 0) {
-            log0("army has size 0");
+            //log0("army has size 0");
             return;
         }                                                                  // army has size 0
         if (nArmy >= from.numArmy) {nArmy = from.numArmy - 1;}                                                                  // not enough armys available in country 1
 
         from.numArmy -= nArmy;
         to.numArmy += nArmy;
-        log0("moved armies");
+        //log0("moved armies");
     }
 
     function attack(uint gameId, uint countryId1, uint countryId2, uint nAttackers) {
@@ -166,39 +165,39 @@ contract KindaRisky {
         Country to = currentGame.countries[countryId2];
 
         if (tx.origin != from.owner) {
-            log0("doesn't own attack country");
+            //log0("doesn't own attack country");
             return;
         }
 
         if (!is_neighbour(gameId, countryId1, countryId2)) {
-            log0("countries aren't neighbours");
+            //log0("countries aren't neighbours");
             return;
         }
         if (nAttackers >= from.numArmy) {
             nAttackers = from.numArmy - 1;
         }
         if (nAttackers <= 0) {
-            log0("army has size 0");
+            //log0("army has size 0");
             return;
         }
 
         from.numArmy -= nAttackers;
         if(nAttackers > to.numArmy) {
-            log0('Country conquered');
+            //log0('Country conquered');
             to.owner = from.owner;
             to.numArmy = nAttackers - to.numArmy;
         }
 
         if(nAttackers == to.numArmy) {
-            log0('Country barely defended');
+            //log0('Country barely defended');
             to.numArmy = 1;
         }
 
         if(nAttackers < to.numArmy) {
-            log0('Country defended');
+            //log0('Country defended');
             to.numArmy -= nAttackers;
         }
-        log0('Attack completed');
+        //log0('Attack completed');
     }
 
     function getNumberOfArmies(uint gameId, uint countryId) returns (uint){
