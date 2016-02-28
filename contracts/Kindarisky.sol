@@ -71,11 +71,11 @@ contract Kindarisky {
         log0("game is starting!");
         games[gameId].state = GameState.IN_PROGRESS;
         games[gameId].startTime = now;
-        
+
         uint nbCountries = games[gameId].numRowsMap ** 2;
         uint nArmies = nbCountries / games[gameId].nbPlayers;
-        
-        
+
+
     }
 
     function addPlayerToGame(uint gameId, address player) returns (uint) {
@@ -93,6 +93,7 @@ contract Kindarisky {
         uint gameId = nbGames;
         nbGames++;
         Game newGame = games[gameId];
+        newGame.state = GameState.CREATED;
         join(gameId);
 
         newGame.defaultNumArmy = 5;
@@ -159,13 +160,13 @@ contract Kindarisky {
             return;
         }
         Game currentGame = games[gameId];
-        
+
         initialiseCountry(gameId, countryId1);
         initialiseCountry(gameId, countryId2);
-        
+
         Country from = currentGame.countries[countryId1];
         Country to = currentGame.countries[countryId2];
-        
+
         if (tx.origin != from.owner) {
             log0("doesn't own attack country");
             return;
@@ -214,20 +215,20 @@ contract Kindarisky {
     }
 
     function getNumberOfArmies(uint gameId, uint countryId) returns (uint){
-        uint nArmy = games[gameId].countries[countryId].numArmy; 
+        uint nArmy = games[gameId].countries[countryId].numArmy;
         if ( nArmy == 0){ return games[gameId].defaultNumArmy; }
         else            { return nArmy;}
     }
 
     function getCountryOwner(uint gameId, uint countryId) returns (address){
-        uint nArmy = games[gameId].countries[countryId].numArmy; 
-        if ( nArmy > 0) 
-        { 
+        uint nArmy = games[gameId].countries[countryId].numArmy;
+        if ( nArmy > 0)
+        {
             return games[gameId].countries[countryId].owner;
         }
         else
         {
-            uint playerId = countryId % games[gameId].nbPlayers;     
+            uint playerId = countryId % games[gameId].nbPlayers;
             log0(bytes32(playerId));
             address player = games[gameId].players[playerId];
             log0(bytes32(player));
@@ -238,7 +239,7 @@ contract Kindarisky {
     // function takeCountryCheat(uint gameId, uint countryId){
     //     games[gameId].countries[countryId].owner = tx.origin;
     // }
-    
+
     function claimReinforcement(uint gameId, uint countryId) {
         uint lastTime = games[gameId].countries[countryId].lastReinforcementTime;
         uint nbArmies = (now - lastTime) / games[gameId].reinforcementRate;
