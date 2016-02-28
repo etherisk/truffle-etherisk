@@ -33,8 +33,8 @@ function Startup() {
     getContract().getMyInProgressGames.call(account).then(function(games) {
       console.log(games);
       for (var i = 0; i < games.length; ++i) {
-        if (games[i] != -1) {
-          SendMessage('GameListPanel', 'SetJoinedGame', '' + games[i]);
+        if (games[i] != 0) {
+          SetJoinedGame(games[i]);
           SendMessage('GameListPanel', 'LoadWorldScene');
           return;
         }
@@ -51,7 +51,7 @@ function FetchGameList() {
     console.log("Available games:");
     console.log(games);
     games.forEach(function(gameId) {
-      if (gameId != -1) {
+      if (gameId != 0) {
         getContract().getNumberOfPlayers.call(gameId).then(function(numPlayers) {
           var name = gameId + " with " + numPlayers + " players";
           console.log(name);
@@ -69,7 +69,7 @@ function FetchGameList() {
 }
 
 function CreateGame() {
-  getContract().createGame(3, 0, {from: account});
+  getContract().createGame(4, 0, {from: account});
   FetchGameList();
 }
 
@@ -95,5 +95,22 @@ function UpdatePlayerCount() {
     SendMessage('GameListPanel', 'SetStatus', status);
 
     setTimeout(UpdatePlayerCount, 3000);
+  });
+}
+
+// WORLD
+
+var nextCountryId = 0;
+
+function WorldStart() {
+  setTimeout(UpdateCountry, 1000);
+}
+
+function UpdateCountry() {
+  getContract().getNumberOfArmies.call(joinedGameId, nextCountryId).then(function(numArmies) {
+    var text = nextCountryId + "/Armies: " + numArmies;
+    SendMessage("WorldMap", 'SetCountryText', text);
+    nextCountryId = (nextCountryId + 1) % 16;
+    setTimeout(UpdateCountry, 1000);
   });
 }
