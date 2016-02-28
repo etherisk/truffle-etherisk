@@ -7,7 +7,7 @@ contract Kindarisky {
         uint numArmy;
         address owner;
         uint bonus;
-        uint lastGrowth;
+        uint lastReinforcementTime;
     }
 
     enum GameState {CREATED, IN_PROGRESS, DONE}
@@ -16,13 +16,16 @@ contract Kindarisky {
         uint gameID;
         address owner;
         uint numRowsMap;
-        uint nbCountries;
+        uint defaultNumArmy;
+        uint reinforcementRate;
         uint nbPlayers;
         uint minPlayers;
         uint maxPlayers;
         GameState state;
+        uint startTime;
         mapping(uint => Country) countries;
         mapping(uint => address) players;
+        mapping(address => uint) countries_owned;
     }
 
     uint nbGames;
@@ -52,16 +55,34 @@ contract Kindarisky {
     function getGameState(uint gameId) constant returns(uint) { return uint(games[gameId].state); }
 
     function join(uint gameId) public returns (uint){
+        if (games[gameId].state != GameState.CREATED) {
+            log0("game already started");
+            return;
+        }
         log0("joining game");
         return addPlayerToGame(gameId,tx.origin);
     }
 
     function startGame(uint gameId) {
+        if (games[gameId].state != GameState.CREATED) {
+            log0("game already started");
+            return;
+        }
         log0("game is starting!");
-        assignPlayersToCountries(gameId);
+        games[gameId].state = GameState.IN_PROGRESS;
+        games[gameId].startTime = now;
+        
+        uint nbCountries = games[gameId].numRowsMap ** 2;
+        uint nArmies = nbCountries / games[gameId].nbPlayers;
+        
+        
     }
 
     function addPlayerToGame(uint gameId, address player) returns (uint) {
+        if (games[gameId].state != GameState.CREATED) {
+            log0("game already started");
+            return;
+        }
         uint newplayer=games[gameId].nbPlayers;
         games[gameId].nbPlayers++;
         games[gameId].players[newplayer]=player;
@@ -72,16 +93,11 @@ contract Kindarisky {
         uint gameId = nbGames;
         nbGames++;
         Game newGame = games[gameId];
+        join(gameId);
 
+        newGame.defaultNumArmy = 5;
         newGame.numRowsMap = numRowsMap;
-        newGame.nbCountries = numRowsMap ** 2;
-
-        for (uint i; i<newGame.nbCountries; i++){
-            newGame.countries[i].id = i;
-            newGame.countries[i].numArmy = 4 + i;
-            newGame.countries[i].bonus = 5;
-            newGame.countries[i].lastGrowth =0;
-        }
+        newGame.reinforcementRate = 1 minutes;
     }
 
     function getNumberOfPlayers(uint gameId) returns (uint) {
@@ -92,24 +108,6 @@ contract Kindarisky {
         return games[gameId].players[playId];
     }
 
-
-    function assignPlayersToCountries(uint gameId) public { // pass gameID and players
-        // for each player who was joined, assign player to country in a round-robin manner
-        uint j=0;
-        Game current = games[gameId];
-        for (uint i=0; i<current.nbCountries; i++){
-            if (j>=current.nbPlayers) {
-                j=0;
-            }
-            current.countries[i].owner = current.players[j];
-            j++;
-        }
-    }
-
-    function joinWaitingRoom(uint roomNumber) public {
-
-    }
-
     function is_neighbour(uint gameId, uint countryId1, uint countryId2) returns (bool) {
         if (countryId1 - countryId2 == 1) {return true;}
         if (countryId2 - countryId1 == 1) {return true;}
@@ -118,8 +116,16 @@ contract Kindarisky {
         return false;
     }
 
-    function move(uint gameId, uint countryId1, uint countryId2, uint nArmy) {
+    function move(uint gameId, uint countryId1, uint countryId2, uint nMovers) {
+        if (games[gameId].state != GameState.IN_PROGRESS) {
+            log0("game not running");
+            return;
+        }
         Game currentGame = games[gameId];
+
+        initialiseCountry(gameId, countryId1);
+        initialiseCountry(gameId, countryId2);
+
         Country from = currentGame.countries[countryId1];
         Country to = currentGame.countries[countryId2];
 
@@ -127,8 +133,8 @@ contract Kindarisky {
             log0("doesn't own country 1");  // the caller doesn't own both countries
             return;
         }
-        if (from.owner != to.owner) {
-            log0("different owners");
+        if (tx.origin != to.owner) {
+            log0("doesn't own country 2");
             return;
         }
 
@@ -136,24 +142,37 @@ contract Kindarisky {
             log0("countries aren't neighbours");
             return;
         }                   // countries aren't neighbours
-        if (nArmy <= 0) {
-            log0("army has size 0");
+        if (nMovers <= 0) {
+            log0("0 movers");
             return;
-        }                                                                  // army has size 0
-        if (nArmy >= from.numArmy) {nArmy = from.numArmy - 1;}                                                                  // not enough armys available in country 1
+        }
+        if (nMovers >= from.numArmy) {nMovers = from.numArmy - 1;}
 
-        from.numArmy -= nArmy;
-        to.numArmy += nArmy;
-        //log0("moved armies");
+        from.numArmy -= nMovers;
+        to.numArmy += nMovers;
+        log0("moved armies");
     }
 
     function attack(uint gameId, uint countryId1, uint countryId2, uint nAttackers) {
+        if (games[gameId].state != GameState.IN_PROGRESS) {
+            log0("game not running");
+            return;
+        }
         Game currentGame = games[gameId];
+        
+        initialiseCountry(gameId, countryId1);
+        initialiseCountry(gameId, countryId2);
+        
         Country from = currentGame.countries[countryId1];
         Country to = currentGame.countries[countryId2];
-
+        
         if (tx.origin != from.owner) {
             log0("doesn't own attack country");
+            return;
+        }
+
+        if (from.owner == to.owner){
+            log0("owns both countries");
             return;
         }
 
@@ -188,15 +207,44 @@ contract Kindarisky {
         log0('Attack completed');
     }
 
+    function initialiseCountry(uint gameId, uint countryId) {
+        games[gameId].countries[countryId].numArmy = getNumberOfArmies(gameId, countryId);
+        games[gameId].countries[countryId].owner = getCountryOwner(gameId, countryId);
+        games[gameId].countries[countryId].lastReinforcementTime = games[gameId].startTime;
+    }
+
     function getNumberOfArmies(uint gameId, uint countryId) returns (uint){
-        return games[gameId].countries[countryId].numArmy;
+        uint nArmy = games[gameId].countries[countryId].numArmy; 
+        if ( nArmy == 0){ return games[gameId].defaultNumArmy; }
+        else            { return nArmy;}
     }
 
     function getCountryOwner(uint gameId, uint countryId) returns (address){
-        return games[gameId].countries[countryId].owner;
+        uint nArmy = games[gameId].countries[countryId].numArmy; 
+        if ( nArmy > 0) 
+        { 
+            return games[gameId].countries[countryId].owner;
+        }
+        else
+        {
+            uint playerId = countryId % games[gameId].nbPlayers;     
+            log0(bytes32(playerId));
+            address player = games[gameId].players[playerId];
+            log0(bytes32(player));
+            return player;
+        }
     }
 
-    function takeCountryCheat(uint gameId, uint countryId){
-        games[gameId].countries[countryId].owner = tx.origin;
+    // function takeCountryCheat(uint gameId, uint countryId){
+    //     games[gameId].countries[countryId].owner = tx.origin;
+    // }
+    
+    function claimReinforcement(uint gameId, uint countryId) {
+        uint lastTime = games[gameId].countries[countryId].lastReinforcementTime;
+        uint nbArmies = (now - lastTime) / games[gameId].reinforcementRate;
+        if(nbArmies > 0) {
+            games[gameId].countries[countryId].numArmy += nbArmies;
+            games[gameId].countries[countryId].lastReinforcementTime += games[gameId].reinforcementRate * nbArmies ;
+        }
     }
 }
