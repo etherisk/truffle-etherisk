@@ -17,6 +17,7 @@ Run testrpc:
 -> testrpc
 
 New terminal:
+-> truffle deploy (redo this after each code change)
 -> truffle serve
 
 Open browser
