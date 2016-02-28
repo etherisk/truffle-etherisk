@@ -34,12 +34,9 @@ contract Kindarisky {
     function getAvailableGames() public returns(int[10] result) {
         uint found = 0;
         uint i;
-        for(i = 0; i < 10; i++) {
-            result[i] = -1;
-        }
         for(i = nbGames ; i != 0 && found < 10; i--) {
-            if(games[i-1].state == GameState.CREATED) {
-                result[found] = int256(i-1);
+            if(games[i].state == GameState.CREATED) {
+                result[found] = int256(i);
                 found++;
             }
         }
@@ -48,12 +45,10 @@ contract Kindarisky {
     function getMyInProgressGames(address me) public returns(int[10] result) {
         uint found = 0;
         uint i;
-        for(i = 0; i < 10; i++) {
-            result[i] = -1;
-        }
+        
         for(i = nbGames ; i != 0 && found < 10; i--) {
-            if(games[i-1].state == GameState.IN_PROGRESS && amIMemberOf(i-1, me)) {
-                result[found] = int256(i-1);
+            if(games[i].state == GameState.IN_PROGRESS && amIMemberOf(i, me)) {
+                result[found] = int256(i);
                 found++;
             }
         }
@@ -114,8 +109,8 @@ contract Kindarisky {
     }
 
     function createGame(uint numRowsMap) public {
-        uint gameId = nbGames;
         nbGames++;
+        uint gameId = nbGames;
         Game newGame = games[gameId];
         newGame.state = GameState.CREATED;
         join(gameId);
