@@ -39,7 +39,7 @@ contract Kindarisky {
         }
         for(i = nbGames ; i != 0 && found < 10; i--) {
             if(games[i-1].state == GameState.CREATED) {
-                result[found] = int256(i);
+                result[found] = int256(i-1);
                 found++;
             }
         }
@@ -273,5 +273,14 @@ contract Kindarisky {
             games[gameId].countries[countryId].numArmy += nbArmies;
             games[gameId].countries[countryId].lastReinforcementTime += games[gameId].reinforcementRate * nbArmies ;
         }
+    }
+    
+    function amIMemberOf(uint gameId) returns (bool) {
+        for(var i = 0 ; i < games[gameId].nbPlayers ; i++) {
+            if(games[gameId].players[i] == tx.origin) {
+                return true;
+            }
+        }
+        return false;
     }
 }
