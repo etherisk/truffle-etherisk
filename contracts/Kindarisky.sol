@@ -45,14 +45,14 @@ contract Kindarisky {
         }
     }
     
-    function getMyInProgressGames() public returns(int[10] result) {
+    function getMyInProgressGames(address me) public returns(int[10] result) {
         uint found = 0;
         uint i;
         for(i = 0; i < 10; i++) {
             result[i] = -1;
         }
         for(i = nbGames ; i != 0 && found < 10; i--) {
-            if(games[i-1].state == GameState.IN_PROGRESS && amIMemberOf(i-1)) {
+            if(games[i-1].state == GameState.IN_PROGRESS && amIMemberOf(i-1, me)) {
                 result[found] = int256(i-1);
                 found++;
             }
@@ -290,9 +290,9 @@ contract Kindarisky {
         }
     }
  
-    function amIMemberOf(uint gameId) returns (bool) {
-        for(var i = 0 ; i < games[gameId].nbPlayers ; i++) {
-            if(games[gameId].players[i] == tx.origin) {
+    function amIMemberOf(uint gameId, address me) returns (bool) {
+        for(uint i = 0 ; i < games[gameId].nbPlayers ; i++) {
+            if(games[gameId].players[i] == me) {
                 return true;
             }
         }
