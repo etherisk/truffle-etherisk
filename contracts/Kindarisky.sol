@@ -305,7 +305,7 @@ contract Kindarisky {
             address player;
             for (uint ixPlayer = 0; ixPlayer < currentGame.nbPlayers; ixPlayer++) {
                 player = currentGame.players[ixPlayer];
-                if (countriesOwned[player] == currentGame.numRowsMap ** 2) {
+                if (currentGame.countriesOwned[player] == currentGame.numRowsMap ** 2) {
                     return player;
                 }
             }
