@@ -44,6 +44,21 @@ contract Kindarisky {
             }
         }
     }
+    
+    function getMyInProgressGames() public returns(int[10] result) {
+        uint found = 0;
+        uint i;
+        for(i = 0; i < 10; i++) {
+            result[i] = -1;
+        }
+        for(i = nbGames ; i != 0 && found < 10; i--) {
+            if(games[i-1].state == GameState.IN_PROGRESS && amIMemberOf(i-1)) {
+                result[found] = int256(i-1);
+                found++;
+            }
+        }
+    }
+    
 
     function getNumberGames() constant returns(uint) { return nbGames; }
 
@@ -274,7 +289,7 @@ contract Kindarisky {
             games[gameId].countries[countryId].lastReinforcementTime += games[gameId].reinforcementRate * nbArmies ;
         }
     }
-    
+ 
     function amIMemberOf(uint gameId) returns (bool) {
         for(var i = 0 ; i < games[gameId].nbPlayers ; i++) {
             if(games[gameId].players[i] == tx.origin) {
@@ -283,4 +298,19 @@ contract Kindarisky {
         }
         return false;
     }
-}
+    
+    function winner(uint gameId) returns (address) {
+        Game currentGame = games[gameId];
+        if (currentGame.state == GameState.DONE) {
+            address player;
+            for (uint ixPlayer = 0; ixPlayer < currentGame.nbPlayers; ixPlayer++) {
+                player = currentGame.players[ixPlayer];
+                if (countriesOwned[player] == currentGame.numRowsMap ** 2) {
+                    return player;
+                }
+            }
+            return 0; // There was no winner
+        }
+    }
+    
+} 
