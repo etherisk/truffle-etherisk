@@ -1,19 +1,14 @@
 contract Kindarisky {
 
     struct Country {
-        uint id;
-        uint nbNeighbors;
-        mapping(uint => Country) neighbors;
         uint numArmy;
         address owner;
-        uint bonus;
         uint lastReinforcementTime;
     }
 
     enum GameState {CREATED, IN_PROGRESS, DONE}
 
     struct Game {
-        uint gameID;
         address owner;
         uint numRowsMap;
         uint defaultNumArmy;
@@ -25,7 +20,7 @@ contract Kindarisky {
         uint startTime;
         mapping(uint => Country) countries;
         mapping(uint => address) players;
-        mapping(address => uint) countries_owned;
+        mapping(address => uint) countriesOwned;
     }
 
     uint nbGames;
@@ -43,7 +38,7 @@ contract Kindarisky {
             result[i] = -1;
         }
         for(i = nbGames ; i != 0 && found < 10; i--) {
-            if(games[i].state == GameState.CREATED) {
+            if(games[i-1].state == GameState.CREATED) {
                 result[found] = int256(i);
                 found++;
             }
@@ -71,11 +66,25 @@ contract Kindarisky {
         log0("game is starting!");
         games[gameId].state = GameState.IN_PROGRESS;
         games[gameId].startTime = now;
-
+        
         uint nbCountries = games[gameId].numRowsMap ** 2;
-        uint nArmies = nbCountries / games[gameId].nbPlayers;
-
-
+        uint nbPlayers = games[gameId].nbPlayers;
+        uint nArmies = nbCountries / nbPlayers;
+        uint nRest = nbCountries % nbPlayers;
+        
+        address player;
+        for (uint ixPlayer = 0; ixPlayer < nbPlayers; ixPlayer++)
+        {
+            player = games[gameId].players[ixPlayer];
+            if (ixPlayer < nRest)
+            {
+                games[gameId].countriesOwned[player] = nArmies + 1;  // the first players get one country more than the others
+            }
+            else
+            {
+                games[gameId].countriesOwned[player] = nArmies;
+            }
+        }
     }
 
     function addPlayerToGame(uint gameId, address player) returns (uint) {
@@ -107,6 +116,11 @@ contract Kindarisky {
 
     function getPlay(uint gameId, uint playId) returns (address) {
         return games[gameId].players[playId];
+    }
+
+    function getNumCountriesOwned(uint gameId, uint playerId) returns (uint) {
+        address player = games[gameId].players[playerId];
+        return games[gameId].countriesOwned[player];
     }
 
     function is_neighbour(uint gameId, uint countryId1, uint countryId2) returns (bool) {
@@ -160,15 +174,18 @@ contract Kindarisky {
             return;
         }
         Game currentGame = games[gameId];
-
+        
         initialiseCountry(gameId, countryId1);
         initialiseCountry(gameId, countryId2);
-
+        
         Country from = currentGame.countries[countryId1];
         Country to = currentGame.countries[countryId2];
-
+        
         if (tx.origin != from.owner) {
             log0("doesn't own attack country");
+            log0(bytes32(tx.origin));
+            log0(bytes32(from.owner));
+            log0("------");
             return;
         }
 
@@ -192,6 +209,14 @@ contract Kindarisky {
         from.numArmy -= nAttackers;
         if(nAttackers > to.numArmy) {
             log0('Country conquered');
+            currentGame.countriesOwned[from.owner] += 1;
+            if (currentGame.countriesOwned[from.owner] == currentGame.numRowsMap ** 2)
+            {
+                log0('All countries conquered');
+                currentGame.state = GameState.DONE;
+            }
+            currentGame.countriesOwned[to.owner] -= 1;
+
             to.owner = from.owner;
             to.numArmy = nAttackers - to.numArmy;
         }
@@ -204,42 +229,43 @@ contract Kindarisky {
         if(nAttackers < to.numArmy) {
             log0('Country defended');
             to.numArmy -= nAttackers;
-        }
+       } 
         log0('Attack completed');
     }
 
     function initialiseCountry(uint gameId, uint countryId) {
-        games[gameId].countries[countryId].numArmy = getNumberOfArmies(gameId, countryId);
-        games[gameId].countries[countryId].owner = getCountryOwner(gameId, countryId);
-        games[gameId].countries[countryId].lastReinforcementTime = games[gameId].startTime;
+        if (games[gameId].countries[countryId].numArmy == 0)
+        {
+            games[gameId].countries[countryId].owner = getCountryOwner(gameId, countryId);
+            games[gameId].countries[countryId].lastReinforcementTime = games[gameId].startTime;
+            games[gameId].countries[countryId].numArmy = getNumberOfArmies(gameId, countryId);
+        }
     }
 
     function getNumberOfArmies(uint gameId, uint countryId) returns (uint){
-        uint nArmy = games[gameId].countries[countryId].numArmy;
+        uint nArmy = games[gameId].countries[countryId].numArmy; 
         if ( nArmy == 0){ return games[gameId].defaultNumArmy; }
         else            { return nArmy;}
     }
 
     function getCountryOwner(uint gameId, uint countryId) returns (address){
-        uint nArmy = games[gameId].countries[countryId].numArmy;
-        if ( nArmy > 0)
-        {
+        uint nArmy = games[gameId].countries[countryId].numArmy; 
+        if ( nArmy > 0) 
+        { 
             return games[gameId].countries[countryId].owner;
         }
         else
         {
-            uint playerId = countryId % games[gameId].nbPlayers;
-            log0(bytes32(playerId));
+            uint playerId = countryId % games[gameId].nbPlayers;     
             address player = games[gameId].players[playerId];
-            log0(bytes32(player));
             return player;
         }
     }
 
-    // function takeCountryCheat(uint gameId, uint countryId){
-    //     games[gameId].countries[countryId].owner = tx.origin;
-    // }
-
+    function takeCountryCheat(uint gameId, uint countryId){
+        games[gameId].countries[countryId].owner = tx.origin;
+    }
+    
     function claimReinforcement(uint gameId, uint countryId) {
         uint lastTime = games[gameId].countries[countryId].lastReinforcementTime;
         uint nbArmies = (now - lastTime) / games[gameId].reinforcementRate;
