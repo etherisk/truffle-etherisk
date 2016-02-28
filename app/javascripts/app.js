@@ -31,6 +31,7 @@ function Startup() {
   web3.eth.getAccounts(function(err, accs) {
     account = accs[0];
     getContract().getMyInProgressGames.call(account).then(function(games) {
+      console.log(games);
       for (var i = 0; i < games.length; ++i) {
         if (games[i] != -1) {
           SendMessage('GameListPanel', 'SetJoinedGame', '' + games[i]);
