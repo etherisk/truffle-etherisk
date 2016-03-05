@@ -254,14 +254,16 @@ contract Kindarisky {
 
     function getArmies(uint gameId) returns (uint[256] result) {
         Game game = games[gameId];
-        for(var i = 0 ; i < game.nbCountries; i++) {            
+        uint nbCountries = game.numRowsMap ** 2;
+        for(var i = 0 ; i < nbCountries; i++) {            
             result[i] = getNumberOfArmies(gameId,i);
         }
     }
 
-    function getOwners(uint gameId, uint countryId) returns (uint[256] result){
+    function getOwners(uint gameId, uint countryId) returns (address[256] result){
         Game game = games[gameId];
-        for(var i = 0 ; i < game.nbCountries; i++) {            
+        uint nbCountries = game.numRowsMap ** 2;
+        for(var i = 0 ; i < nbCountries; i++) {            
             result[i] = getCountryOwner(gameId,i);
         }
     }
