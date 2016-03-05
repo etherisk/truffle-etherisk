@@ -120,15 +120,15 @@ contract Kindarisky {
         newGame.reinforcementRate = 1 minutes;
     }
 
-    function getNumberOfPlayers(uint gameId) returns (uint) {
+    function getNumberOfPlayers(uint gameId) constant returns (uint) {
         return games[gameId].nbPlayers;
     }
 
-    function getPlay(uint gameId, uint playId) returns (address) {
+    function getPlay(uint gameId, uint playId) constant returns (address) {
         return games[gameId].players[playId];
     }
 
-    function getNumCountriesOwned(uint gameId, uint playerId) returns (uint) {
+    function getNumCountriesOwned(uint gameId, uint playerId) constant returns (uint) {
         address player = games[gameId].players[playerId];
         return games[gameId].countriesOwned[player];
     }
@@ -143,7 +143,7 @@ contract Kindarisky {
         return false;
     }
 
-    function move(uint gameId, uint countryId1, uint countryId2, uint nMovers) {
+    function move(uint gameId, uint countryId1, uint countryId2, uint nMovers) public {
         if (games[gameId].state != GameState.IN_PROGRESS) {
             log0("game not running");
             return;
@@ -180,7 +180,7 @@ contract Kindarisky {
         log0("moved armies");
     }
 
-    function attack(uint gameId, uint countryId1, uint countryId2, uint nAttackers) {
+    function attack(uint gameId, uint countryId1, uint countryId2, uint nAttackers) public {
         if (games[gameId].state != GameState.IN_PROGRESS) {
             log0("game not running");
             return;
@@ -254,19 +254,19 @@ contract Kindarisky {
         }
     }
 
-    function getNbCountries(uint gameId) returns (uint) {
+    function getNbCountries(uint gameId) constant returns (uint) {
         return games[gameId].numRowsMap ** 2;
     }
 
 
-    function getArmies(uint gameId) returns (uint[256] result) {
+    function getArmies(uint gameId) constant returns (uint[256] result) {
         uint nbCountries = getNbCountries(gameId);
         for(var i = 0 ; i < nbCountries; i++) {            
             result[i] = getNumberOfArmies(gameId,i);
         }
     }
 
-    function getOwners(uint gameId) returns (uint[256] result){
+    function getOwners(uint gameId) constant returns (uint[256] result) {
         uint nbCountries = getNbCountries(gameId);
         mapping(address => uint) ids;
         for(var p = 0 ; p < games[gameId].nbPlayers; ++p) {
@@ -278,13 +278,13 @@ contract Kindarisky {
         }
     }
 
-    function getNumberOfArmies(uint gameId, uint countryId) returns (uint){
+    function getNumberOfArmies(uint gameId, uint countryId) constant returns (uint){
         uint nArmy = games[gameId].countries[countryId].numArmy; 
         if ( nArmy == 0){ return games[gameId].defaultNumArmy; }
         else            { return nArmy;}
     }
 
-    function getCountryOwner(uint gameId, uint countryId) returns (address){
+    function getCountryOwner(uint gameId, uint countryId) constant returns (address){
         uint nArmy = games[gameId].countries[countryId].numArmy; 
         if ( nArmy > 0) 
         { 
@@ -297,10 +297,6 @@ contract Kindarisky {
             return player;
         }
     }
-
-    function takeCountryCheat(uint gameId, uint countryId){
-        games[gameId].countries[countryId].owner = tx.origin;
-    }
     
     function claimReinforcement(uint gameId, uint countryId) {
         uint lastTime = games[gameId].countries[countryId].lastReinforcementTime;
@@ -311,7 +307,7 @@ contract Kindarisky {
         }
     }
  
-    function amIMemberOf(uint gameId, address me) returns (bool) {
+    function amIMemberOf(uint gameId, address me) constant returns (bool) {
         for(uint i = 0 ; i < games[gameId].nbPlayers ; i++) {
             if(games[gameId].players[i] == me) {
                 return true;
@@ -320,7 +316,7 @@ contract Kindarisky {
         return false;
     }
     
-    function winner(uint gameId) returns (address) {
+    function winner(uint gameId) constant returns (address) {
         Game currentGame = games[gameId];
         if (currentGame.state == GameState.DONE) {
             address player;
