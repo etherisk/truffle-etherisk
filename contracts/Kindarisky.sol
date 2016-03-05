@@ -252,6 +252,11 @@ contract Kindarisky {
         }
     }
 
+    function getNbCountries(uint gameId) returns (uint) {
+        return games[gameId].numRowsMap ** 2;
+    }
+
+
     function getArmies(uint gameId) returns (uint[256] result) {
         Game game = games[gameId];
         uint nbCountries = game.numRowsMap ** 2;
