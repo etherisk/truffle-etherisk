@@ -33,12 +33,12 @@ function Startup() {
     if (!account) {
       throw "You must set an account to play";
     }
-    getContract().getMyInProgressGames.call(account).then(function(games) {
+    var contract = getContract();
+    contract.getMyInProgressGames.call(account).then(function(games) {
       console.log(games);
       for (var i = 0; i < games.length; ++i) {
         if (games[i] != 0) {
           SetJoinedGame(games[i]);
-          SendMessage('GameListPanel', 'LoadWorldScene');
           return;
         }
       }
@@ -48,23 +48,17 @@ function Startup() {
 }
 
 function FetchGameList() {
-  SendMessage('GameListPanel', 'ClearGames', name);
+  var games = [];
   // This is called when the Unity app has finished starting up.
   getAvailableGames().then(function(games) {
-    console.log("Available games:");
-    console.log(games);
     games.forEach(function(gameId) {
       if (gameId != 0) {
         getContract().getNumberOfPlayers.call(gameId).then(function(numPlayers) {
-          var name = gameId + " with " + numPlayers + " players";
-          console.log(name);
-          SendMessage('GameListPanel', 'AddGame', name);
-          getContract().amIMemberOf.call(gameId, account).then(function(isMember) {
-            console.log('member: ' + isMember);
-            if (isMember) {
-              SetJoinedGame(gameId);
-            }
-          })
+          var game = {
+            id : gameId,
+            nbPlayers : numPlayers
+          }
+          games.push(game);
         });
       }
     });
@@ -84,18 +78,15 @@ function JoinGame(name) {
 
 function SetJoinedGame(gameId) {
   joinedGameId = gameId;
-  SendMessage('GameListPanel', 'SetJoinedGame', '' + joinedGameId);
 }
 
 function StartGame() {
   getContract().startGame(joinedGameId, 0, {from:account});
-  SendMessage('GameListPanel', 'LoadWorldScene');
 }
 
 function UpdatePlayerCount() {
   getContract().getNumberOfPlayers.call(joinedGameId).then(function(numPlayers) {
     var status = numPlayers + " joined out of 4";
-    SendMessage('GameListPanel', 'SetStatus', status);
 
     setTimeout(UpdatePlayerCount, 3000);
   });
@@ -126,3 +117,7 @@ function UpdateCountry() {
     });
   });
 }
+
+
+
+Startup();
