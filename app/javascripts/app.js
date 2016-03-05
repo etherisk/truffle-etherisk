@@ -29,10 +29,10 @@ function getAvailableGames() {
 
 function Startup() {
   web3.eth.getAccounts(function(err, accs) {
-    account = accs[0];
-    if (!account) {
+    if (!acc || !accs[0]) {
       throw "You must set an account to play";
     }
+    account = accs[0];
     getContract().getMyInProgressGames.call(account).then(function(games) {
       console.log(games);
       for (var i = 0; i < games.length; ++i) {
