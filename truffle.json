@@ -2,7 +2,11 @@
   "build": {
     "index.html": "index.html",
     "play.html": "play.html",
-    "app.js": "javascripts/app.js",
+    "app.js": [
+      "javascripts/react.js",
+      "javascripts/react-dom.js",
+      "javascripts/app.js"
+    ],
     "app.css": [
       "stylesheets/app.css"
     ],
