@@ -134,8 +134,10 @@ contract Kindarisky {
     }
 
     function is_neighbour(uint gameId, uint countryId1, uint countryId2) returns (bool) {
-        if (countryId1 - countryId2 == 1) {return true;}
-        if (countryId2 - countryId1 == 1) {return true;}
+        uint rowSize = games[gameId].numRowsMap;
+
+        if (countryId1 - countryId2 == 1) {return countryId1 % rowSize == countryId2 % rowSize;}
+        if (countryId2 - countryId1 == 1) {return countryId1 % rowSize == countryId2 % rowSize;}
         if (countryId1 - countryId2 == games[gameId].numRowsMap) {return true;}
         if (countryId2 - countryId1 == games[gameId].numRowsMap) {return true;}
         return false;
@@ -264,10 +266,15 @@ contract Kindarisky {
         }
     }
 
-    function getOwners(uint gameId) returns (address[256] result){
+    function getOwners(uint gameId) returns (uint[256] result){
         uint nbCountries = getNbCountries(gameId);
+        mapping(address => uint) ids;
+        for(var p = 0 ; p < games[gameId].nbPlayers; ++p) {
+            ids[games[gameId].players[p]] = p;
+        }
+
         for(var i = 0 ; i < nbCountries; i++) {            
-            result[i] = getCountryOwner(gameId,i);
+            result[i] = ids[getCountryOwner(gameId,i)];
         }
     }
 
