@@ -252,6 +252,25 @@ contract Kindarisky {
         }
     }
 
+    function getNbCountries(uint gameId) returns (uint) {
+        return games[gameId].numRowsMap ** 2;
+    }
+
+
+    function getArmies(uint gameId) returns (uint[256] result) {
+        uint nbCountries = getNbCountries(gameId);
+        for(var i = 0 ; i < nbCountries; i++) {            
+            result[i] = getNumberOfArmies(gameId,i);
+        }
+    }
+
+    function getOwners(uint gameId) returns (address[256] result){
+        uint nbCountries = getNbCountries(gameId);
+        for(var i = 0 ; i < nbCountries; i++) {            
+            result[i] = getCountryOwner(gameId,i);
+        }
+    }
+
     function getNumberOfArmies(uint gameId, uint countryId) returns (uint){
         uint nArmy = games[gameId].countries[countryId].numArmy; 
         if ( nArmy == 0){ return games[gameId].defaultNumArmy; }
