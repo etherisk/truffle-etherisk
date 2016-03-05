@@ -1,9 +1,30 @@
 // tutorial10.js
 var RiskMenu = React.createClass({
-  componentDidMount: () => {
-    FetchGameList(this);
+  loadFromServer: function() {
+    return FetchGameList(this);
   },
-  render: () =>  {
+  componentDidMount: function() {
+    this.loadFromServer();
+    setInterval(this.loadFromServer, 500);
+    
+  },
+  getInitialState: function() {
+    return {data: []};
+  },
+  render: function(){
+    var games = this.state.data.map(game => {
+      return (
+        <tr><td>{game.id}</td><td>{game.nbPlayers}</td></tr>
+      );
+    });
+    return (
+      <RiskTable data={this.state.data} />
+    );
+  }
+});
+
+var RiskTable = React.createClass({
+  render: function() {
     var games = this.props.data.map(game => {
       return (
         <tr><td>{game.id}</td><td>{game.nbPlayers}</td></tr>
