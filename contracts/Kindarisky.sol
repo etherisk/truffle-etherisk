@@ -268,7 +268,7 @@ contract Kindarisky {
 
     function getOwners(uint gameId) returns (uint[256] result){
         uint nbCountries = getNbCountries(gameId);
-        memory mapping(address => uint) ids;
+        mapping(address => uint) ids;
         for(var p = 0 ; p < games[gameId].nbPlayers; ++p) {
             ids[games[gameId].players[p]] = p;
         }
