@@ -111,13 +111,15 @@ function WorldStart() {
 }
 
 function UpdateCountry() {
-  getContract().getNumberOfArmies.call(joinedGameId, nextCountryId).then(function(numArmies) {
-    getContract().getCountryOwner.call(joinedGameId, )
-    var text = nextCountryId + "/Armies: " + numArmies;
-    var encoded = args(nextCountryId, "Armies: " + numArmies, Math.floor(Math.random() * 4));
-    console.log(encoded);
-    SendMessage("WorldMap", 'SetCountry', encoded);
-    nextCountryId = (nextCountryId + 1) % 16;
-    setTimeout(UpdateCountry, 1000);
+  getContract().getArmies.call(joinedGameId, nextCountryId).then(function(armies) {
+    getContract().getOwners.call(joinedGameId, nextCountryId).then(function(owners) {
+      for (var i = 0; i < 16; ++i) {
+        var encoded = args(nextCountryId, "Armies: " + armies[i], owners[i]);
+        console.log(encoded);
+        // SendMessage("WorldMap", 'SetCountry', encoded);
+        nextCountryId = (nextCountryId + 1) % 16;
+      }
+      setTimeout(UpdateCountry, 1000);
+    });
   });
 }
