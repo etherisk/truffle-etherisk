@@ -1,2 +1,4 @@
 .DS_Store
-
+/environments/development/build
+/environments/development/contracts
+/environments/production/dist
