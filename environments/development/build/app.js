@@ -5475,13 +5475,13 @@ function getAvailableGames() {
 }
 
 function Startup() {
-  web3.eth.getAccounts(function(err, accs) {
+  web3.eth.getAccounts((err, accs) => {
     account = accs[0];
     if (!account) {
       throw "You must set an account to play";
     }
     var contract = getContract();
-    contract.getMyInProgressGames.call(account).then(function(games) {
+    contract.getMyInProgressGames.call(account).then(games => {
       console.log(games);
       for (var i = 0; i < games.length; ++i) {
         if (games[i] != 0) {
@@ -5494,18 +5494,21 @@ function Startup() {
   });
 }
 
-function FetchGameList() {
+function FetchGameList(reactElement) {
   var games = [];
   // This is called when the Unity app has finished starting up.
-  getAvailableGames().then(function(games) {
-    games.forEach(function(gameId) {
+  getAvailableGames().then(games => {
+    games.forEach(gameId => {
       if (gameId != 0) {
-        getContract().getNumberOfPlayers.call(gameId).then(function(numPlayers) {
+        getContract().getNumberOfPlayers.call(gameId).then(numPlayers => {
           var game = {
             id : gameId,
             nbPlayers : numPlayers
           }
           games.push(game);
+          reactElement.setState({
+            data: games
+          });
         });
       }
     });

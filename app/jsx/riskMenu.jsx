@@ -21,3 +21,9 @@ var RiskMenu = React.createClass({
     );
   }
 });
+
+
+ReactDOM.render(
+  <RiskMenu />,
+  document.getElementById('content')
+);

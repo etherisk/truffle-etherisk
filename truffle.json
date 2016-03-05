@@ -8,7 +8,7 @@
     ],
     "jsx.js": [
       "jsx/riskMenu.jsx"
-    ],
+    ]
   },
   "deploy": [
     "Kindarisky"
