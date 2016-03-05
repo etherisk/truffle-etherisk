@@ -260,7 +260,7 @@ contract Kindarisky {
         }
     }
 
-    function getOwners(uint gameId, uint countryId) returns (address[256] result){
+    function getOwners(uint gameId) returns (address[256] result){
         Game game = games[gameId];
         uint nbCountries = game.numRowsMap ** 2;
         for(var i = 0 ; i < nbCountries; i++) {            
