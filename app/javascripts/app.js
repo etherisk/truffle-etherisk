@@ -29,7 +29,7 @@ function getAvailableGames() {
 
 function Startup() {
   web3.eth.getAccounts(function(err, accs) {
-    if (!acc || !accs[0]) {
+    if (!accs || !accs[0]) {
       throw "You must set an account to play";
     }
     account = accs[0];
