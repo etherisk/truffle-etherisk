@@ -5,7 +5,10 @@
     "app.js": "javascripts/app.js",
     "app.css": [
       "stylesheets/app.css"
-    ]
+    ],
+    "jsx.js": [
+      "jsx/riskMenu.jsx"
+    ],
   },
   "deploy": [
     "Kindarisky"

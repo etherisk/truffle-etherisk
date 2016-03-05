@@ -1,7 +1,10 @@
 // tutorial10.js
 var RiskMenu = React.createClass({
-  render: function() {
-    var games = this.props.data.map(function(game) {
+  componentDidMount: () => {
+    FetchGameList(this);
+  },
+  render: () =>  {
+    var games = this.props.data.map(game => {
       return (
         <tr><td>{game.id}</td><td>{game.nbPlayers}</td></tr>
       );
@@ -12,7 +15,7 @@ var RiskMenu = React.createClass({
         <tr><th>Game ID</th><th>Number of players</th></tr>
       </thead>
       <tbody>
-        {requests}
+        {games}
       </tbody>
       </table>
     );

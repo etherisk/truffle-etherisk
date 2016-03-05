@@ -47,18 +47,21 @@ function Startup() {
   });
 }
 
-function FetchGameList() {
+function FetchGameList(reactElement) {
   var games = [];
   // This is called when the Unity app has finished starting up.
-  getAvailableGames().then(function(games) {
-    games.forEach(function(gameId) {
+  getAvailableGames().then(games => {
+    games.forEach(gameId => {
       if (gameId != 0) {
-        getContract().getNumberOfPlayers.call(gameId).then(function(numPlayers) {
+        getContract().getNumberOfPlayers.call(gameId).then(numPlayers => {
           var game = {
             id : gameId,
             nbPlayers : numPlayers
           }
           games.push(game);
+          reactElement.setState({
+            data: games
+          });
         });
       }
     });
