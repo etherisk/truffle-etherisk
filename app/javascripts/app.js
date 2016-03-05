@@ -20,7 +20,7 @@ var joinedGameId;
 
 function getContract() {
   //return Kindarisky.at('d9e3996d5f4aece4d5878a2e2c8d986653e5532e');
-  return Kindarisky.deployed();
+  return Kindarisky.at('0x41280fbCa4b614995FABdda3af053ACD2cDc5F80');
 }
 
 function getAvailableGames() {
