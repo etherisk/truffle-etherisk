@@ -48,6 +48,10 @@ function Startup() {
 }
 
 function FetchGameList() {
+  if (joinedGameId) {
+    // Don't fetch anymore.
+    return;
+  }
   SendMessage('GameListPanel', 'ClearGames', name);
   // This is called when the Unity app has finished starting up.
   getAvailableGames().then(function(games) {
@@ -68,6 +72,7 @@ function FetchGameList() {
         });
       }
     });
+    setTimeout(8000, FetchGameList);
   });
 }
 
