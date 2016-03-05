@@ -31,7 +31,7 @@ contract Kindarisky {
         log0("Creating KindaRisky!");
     }
 
-    function getAvailableGames() public returns(int[10] result) {
+    function getAvailableGames() constant returns(int[10] result) {
         uint found = 0;
         uint i;
         for(i = nbGames ; i != 0 && found < 10; i--) {

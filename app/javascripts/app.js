@@ -20,7 +20,7 @@ var joinedGameId;
 
 function getContract() {
   //return Kindarisky.at('d9e3996d5f4aece4d5878a2e2c8d986653e5532e');
-  return Kindarisky.at('0x41280fbCa4b614995FABdda3af053ACD2cDc5F80');
+  return Kindarisky.at('0xAA82d3269E2EbA7B12F066135158D0B2199bBFAF');
 }
 
 function getAvailableGames() {
@@ -28,6 +28,7 @@ function getAvailableGames() {
 }
 
 function Startup() {
+  web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:8545"))
   web3.eth.getAccounts(function(err, accs) {
     account = accs[0];
     getContract().getMyInProgressGames.call(account).then(function(games) {
