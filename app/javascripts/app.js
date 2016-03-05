@@ -115,8 +115,8 @@ function UpdateCountry() {
     getContract().getOwners.call(joinedGameId, nextCountryId).then(function(owners) {
       for (var i = 0; i < 16; ++i) {
         var encoded = args(nextCountryId, "Armies: " + armies[i], owners[i]);
-        console.log(encoded);
-        // SendMessage("WorldMap", 'SetCountry', encoded);
+        // console.log(encoded);
+        SendMessage("WorldMap", 'SetCountry', encoded);
         nextCountryId = (nextCountryId + 1) % 16;
       }
       setTimeout(UpdateCountry, 1000);
