@@ -102,15 +102,24 @@ function UpdatePlayerCount() {
 
 var nextCountryId = 0;
 
+function args() {
+  return Array.prototype.join.call(arguments, "/");
+}
+
 function WorldStart() {
   setTimeout(UpdateCountry, 1000);
 }
 
 function UpdateCountry() {
-  getContract().getNumberOfArmies.call(joinedGameId, nextCountryId).then(function(numArmies) {
-    var text = nextCountryId + "/Armies: " + numArmies;
-    SendMessage("WorldMap", 'SetCountryText', text);
-    nextCountryId = (nextCountryId + 1) % 16;
-    setTimeout(UpdateCountry, 1000);
+  getContract().getArmies.call(joinedGameId, nextCountryId).then(function(armies) {
+    getContract().getOwners.call(joinedGameId, nextCountryId).then(function(owners) {
+      for (var i = 0; i < 16; ++i) {
+        var encoded = args(nextCountryId, "Armies: " + armies[i], owners[i]);
+        // console.log(encoded);
+        SendMessage("WorldMap", 'SetCountry', encoded);
+        nextCountryId = (nextCountryId + 1) % 16;
+      }
+      setTimeout(UpdateCountry, 1000);
+    });
   });
 }
