@@ -102,14 +102,21 @@ function UpdatePlayerCount() {
 
 var nextCountryId = 0;
 
+function args() {
+  return Array.prototype.join.call(arguments, "/");
+}
+
 function WorldStart() {
   setTimeout(UpdateCountry, 1000);
 }
 
 function UpdateCountry() {
   getContract().getNumberOfArmies.call(joinedGameId, nextCountryId).then(function(numArmies) {
+    getContract().getCountryOwner.call(joinedGameId, )
     var text = nextCountryId + "/Armies: " + numArmies;
-    SendMessage("WorldMap", 'SetCountryText', text);
+    var encoded = args(nextCountryId, "Armies: " + numArmies, Math.floor(Math.random() * 4));
+    console.log(encoded);
+    SendMessage("WorldMap", 'SetCountry', encoded);
     nextCountryId = (nextCountryId + 1) % 16;
     setTimeout(UpdateCountry, 1000);
   });
