@@ -5475,7 +5475,6 @@ function getAvailableGames() {
 }
 
 function Startup() {
-  web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:8545"))
   web3.eth.getAccounts(function(err, accs) {
     account = accs[0];
     getContract().getMyInProgressGames.call(account).then(function(games) {

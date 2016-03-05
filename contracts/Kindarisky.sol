@@ -309,7 +309,7 @@ contract Kindarisky {
  
     function amIMemberOf(uint gameId, address me) constant returns (bool) {
         for(uint i = 0 ; i < games[gameId].nbPlayers ; i++) {
-            if(games[gameId].players[i] == me) {
+            if(games[gameId].players[i] == me && games[gameId].state != GameState.DONE) {
                 return true;
             }
         }
@@ -327,6 +327,12 @@ contract Kindarisky {
                 }
             }
             return 0; // There was no winner
+        }
+    }
+
+    function closeIfGameIsFinisehd(uint gameId) public {
+        if(winner(gameId) != 0)  {
+            games[gameId].state = GameState.DONE;
         }
     }
     
