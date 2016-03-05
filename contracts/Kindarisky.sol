@@ -134,8 +134,10 @@ contract Kindarisky {
     }
 
     function is_neighbour(uint gameId, uint countryId1, uint countryId2) returns (bool) {
-        if (countryId1 - countryId2 == 1) {return true;}
-        if (countryId2 - countryId1 == 1) {return true;}
+        uint rowSize = games[gameId].numRowsMap;
+
+        if (countryId1 - countryId2 == 1) {return countryId1 % rowSize == countryId2 % rowSize;}
+        if (countryId2 - countryId1 == 1) {return countryId1 % rowSize == countryId2 % rowSize;}
         if (countryId1 - countryId2 == games[gameId].numRowsMap) {return true;}
         if (countryId2 - countryId1 == games[gameId].numRowsMap) {return true;}
         return false;
