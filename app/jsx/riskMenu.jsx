@@ -54,7 +54,7 @@ var ContinueGame = React.createClass({
   continueGame: function(event){
     var game = this.props.data;
     ReactDOM.render(
-      <RiskBoard />,
+      <RiskBoard data={game} />,
       document.getElementById('content')
     );
   },

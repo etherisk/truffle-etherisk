@@ -69,7 +69,7 @@ var ContinueGame = React.createClass({
 
   continueGame: function continueGame(event) {
     var game = this.props.data;
-    ReactDOM.render(React.createElement(RiskBoard, null), document.getElementById('content'));
+    ReactDOM.render(React.createElement(RiskBoard, { data: game }), document.getElementById('content'));
   },
   render: function render() {
     return React.createElement(
@@ -136,11 +136,44 @@ ReactDOM.render(React.createElement(RiskMenu, null), document.getElementById('co
 var RiskBoard = React.createClass({
   displayName: "RiskBoard",
 
+  loadFromServer: function loadFromServer() {
+    var game = this.props.data;
+    getContract().getArmies.call(game.id).then(function (armies) {
+      for (var i = 0; i < 16; ++i) {
+        $("#armies" + i).text(armies[i]);
+      }
+    });
+  },
+  componentDidMount: function componentDidMount() {
+    this.loadFromServer();
+    setInterval(this.loadFromServer, 1000);
+  },
   render: function render() {
+    var game = this.props.data;
+    var rows = [];
+    for (var i = 0; i < 4; ++i) {
+      var countries = [];
+      for (var j = 0; j < 4; ++j) {
+        countries[j] = React.createElement(
+          "div",
+          { id: 'country' + i, className: "col-md-3" },
+          React.createElement(
+            "span",
+            { className: "badge" },
+            React.createElement("h4", { id: 'armies' + (4 * i + j) })
+          )
+        );
+      }
+      rows.push(React.createElement(
+        "div",
+        { className: "row" },
+        countries
+      ));
+    }
     return React.createElement(
       "div",
       { className: "row" },
-      "Welcome to the board game!"
+      rows
     );
   }
 });
