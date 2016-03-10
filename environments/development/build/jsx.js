@@ -137,10 +137,18 @@ var RiskBoard = React.createClass({
   displayName: "RiskBoard",
 
   loadFromServer: function loadFromServer() {
+    var self = this;
     var game = this.props.data;
     getContract().getArmies.call(game.id).then(function (armies) {
       for (var i = 0; i < 16; ++i) {
-        $("#armies" + i).text(armies[i]);
+        $("#army" + i).text(armies[i]);
+      }
+    });
+
+    getContract().getOwners.call(game.id).then(function (owners) {
+      for (var i = 0; i < 16; ++i) {
+        $("#country" + i).removeClass();
+        $("#country" + i).addClass('col-md-3 ' + self.getColor(owners[i]));
       }
     });
   },
@@ -148,20 +156,30 @@ var RiskBoard = React.createClass({
     this.loadFromServer();
     setInterval(this.loadFromServer, 1000);
   },
+  getColor: function getColor(id) {
+    var t = id % 4;
+    switch (t) {
+      case 0:
+        return 'label-primary';
+      case 1:
+        return 'label-success';
+      case 2:
+        return 'label-warning';
+      case 3:
+        return 'label-info';
+    }
+  },
   render: function render() {
     var game = this.props.data;
     var rows = [];
     for (var i = 0; i < 4; ++i) {
       var countries = [];
       for (var j = 0; j < 4; ++j) {
+        var id = 4 * i + j;
         countries[j] = React.createElement(
           "div",
-          { id: 'country' + i, className: "col-md-3" },
-          React.createElement(
-            "span",
-            { className: "badge" },
-            React.createElement("h4", { id: 'armies' + (4 * i + j) })
-          )
+          { id: 'country' + id, className: "col-md-3" },
+          React.createElement("h4", { id: 'army' + id })
         );
       }
       rows.push(React.createElement(
