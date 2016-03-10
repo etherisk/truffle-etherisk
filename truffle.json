@@ -1,7 +1,7 @@
 {
   "build": {
     "index.html": "index.html",
-    "play.html": "play.html",
+    "help.html": "help.html",
     "app.js": [
       "javascripts/react.js",
       "javascripts/react-dom.js",
@@ -11,14 +11,16 @@
       "stylesheets/app.css"
     ],
     "jsx.js": [
-      "jsx/riskMenu.jsx"
-    ]
+      "jsx/riskMenu.jsx",
+      "jsx/riskGame.jsx"
+    ],
+    "assets/" : "assets/"
   },
   "deploy": [
     "Kindarisky"
   ],
   "rpc": {
-    "host": "127.0.0.1",
+    "host": "localhost",
     "port": 8545
   }
 }

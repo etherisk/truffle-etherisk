@@ -1,97 +1,101 @@
 var riskContract;
 var account;
-var joinedGameId;
-
-/*
-  j Startup()
-  e getMyInProgressGames()
-  j FetchGameList()
-  u ClearGames()
-  e getAvailableGames()
-    e getNumberOfPlayers()
-    u AddGame()...
-    e amIMemberOf()
-  j CreateGame() OR JoinGame() (OR amIMemberOf() is true)
-  u SetJoinedGame()
-  (when we have enough players OR see state is IN_PROGRESS)
-  j StartGame()
-  e startGame()
-*/
+var button;
+var background;
+var games = {};
+var gameIds = [];
 
 function getContract() {
-  //return Kindarisky.at('d9e3996d5f4aece4d5878a2e2c8d986653e5532e');
-  return Kindarisky.at('0xB4C4CAfe4f5514825602868cD62dB069bb40Bc5f');
+  return Kindarisky.at('0x3e6218DC007EF5986C24B9883Fa8B8F843546E51');
 }
 
 function getAvailableGames() {
   return getContract().getAvailableGames.call();
 }
 
-function Startup() {
+function LoadAccount() {
   web3.eth.getAccounts((err, accs) => {
     account = accs[0];
     if (!account) {
       throw "You must set an account to play";
     }
-    var contract = getContract();
-    contract.getMyInProgressGames.call(account).then(games => {
-      console.log(games);
-      for (var i = 0; i < games.length; ++i) {
-        if (games[i] != 0) {
-          SetJoinedGame(games[i]);
-          return;
-        }
-      }
-      FetchGameList();
+    web3.eth.defaultAccount = account;
+  });
+}
+
+function removeOldGames(oldGames) {
+  gameIds = gameIds.filter( el => {
+    return oldGames.indexOf( el ) < 0;
+  });
+
+  oldGames.forEach(id => delete games[id]);
+}
+
+function updateGames(reactElement) {
+  gameIds.forEach(id => {
+    var currentGame = games[id];
+    if(!currentGame){
+      games[id] = {id:id};
+      currentGame = games[id];
+    }
+    getContract().getNumberOfPlayers.call(id).then(numP => {
+      var numPlayers = parseInt(numP.toString());
+      getContract().amIMemberOf.call(id,account).then(isMember => {
+        getContract().getGameState.call(id).then(state => {
+          var gameState = parseInt(state.toString());
+          currentGame.nbPlayers = numPlayers.toString();
+          currentGame.isMember = isMember;
+          currentGame.state=  gameState === 0 ? 'CREATED' : gameState === 1 ? 'IN_PROGRESS' : 'DONE'
+          var gameObjects = gameIds.map(id => games[id]);
+          reactElement.setState({
+            data: gameObjects
+          });
+        });
+      });
     });
+    
   });
 }
 
 function FetchGameList(reactElement) {
-  var games = [];
+  var gameObjects = [];
   // This is called when the Unity app has finished starting up.
-  getAvailableGames().then(games => {
-    games.forEach(gameId => {
-      if (gameId != 0) {
-        getContract().getNumberOfPlayers.call(gameId).then(numPlayers => {
-          var game = {
-            id : gameId,
-            nbPlayers : numPlayers
-          }
-          games.push(game);
-          reactElement.setState({
-            data: games
-          });
-        });
-      }
+  
+  getAvailableGames().then(result => {
+    var games = result.map(function(id){
+      return id.toString();
+    }).filter(function(id) {
+      return id !== "0";
     });
+
+    var oldGames = $(gameIds).not(games).get();
+    var newGames = $(games).not(gameIds).get();
+
+    removeOldGames(oldGames);
+    gameIds = gameIds.concat(newGames);
+    updateGames(reactElement);
   });
 }
 
+function TxCallback(err,response) {
+  alert(err);
+  alert(response);
+}
+
 function CreateGame() {
-  getContract().createGame(4, 0, {from: account});
-  FetchGameList();
+  $('#waiting').modal('show');
+  getContract().createGame(4,4).then(function() {
+    $('#waiting').modal('hide');
+  });  
 }
 
-function JoinGame(name) {
-  SetJoinedGame(parseInt(name));
-  getContract().join(joinedGameId, 0, {from:account});
-  UpdatePlayerCount();
-}
-
-function SetJoinedGame(gameId) {
-  joinedGameId = gameId;
-}
-
-function StartGame() {
-  getContract().startGame(joinedGameId, 0, {from:account});
+function errorHandling(err){
+  console.error(err);
 }
 
 function UpdatePlayerCount() {
   getContract().getNumberOfPlayers.call(joinedGameId).then(function(numPlayers) {
     var status = numPlayers + " joined out of 4";
-
-    setTimeout(UpdatePlayerCount, 3000);
   });
 }
 
@@ -112,15 +116,10 @@ function UpdateCountry() {
     getContract().getOwners.call(joinedGameId, nextCountryId).then(function(owners) {
       for (var i = 0; i < 16; ++i) {
         var encoded = args(nextCountryId, "Armies: " + armies[i], owners[i]);
-        // console.log(encoded);
-        SendMessage("WorldMap", 'SetCountry', encoded);
+        
         nextCountryId = (nextCountryId + 1) % 16;
       }
       setTimeout(UpdateCountry, 1000);
     });
   });
 }
-
-
-
-Startup();

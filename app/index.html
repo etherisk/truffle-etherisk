@@ -4,35 +4,46 @@
   <title>EtheRisk - It is on!!!</title>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
   <link href="./app.css" rel='stylesheet' type='text/css'>
+  <!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.1/jquery.min.js" ></script>
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 </head>
-<body>
-  <ul class="menu">
-    <li><a class="active" href="/index.html">Home</a></li>
-    <li><a href="/play.html">Play</a></li>
-</ul>
+  <nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">
+        Ethrisk!
+      </a>
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="/index.html">Play! <span class="sr-only">(current)</span></a></li>
+        <li><a href="/about.html">About</a></li>
+        <li><button type="button" class="btn btn-default navbar-btn" onClick="CreateGame()">New Game</button></li>
+    </ul>
+    </div>
+  </div>
+</nav>
+<div id="content" class="container">Let's play here !!!!</div>
 
-<p>
-  Welcome to EthRisk aka Kindarisky. 
-</p>
-<p>
-In order to play this game you will:
-<p>
-Download the latest version of Mist https://github.com/ethereum/mist
-Right now, you need to install the latest version and run it manually to make it work. Please follow the instructions at <a href="https://github.com/ethereum/mist#development">https://github.com/ethereum/mist#development</a>
-</p>
-<p>
-You need to switch on the Test network. The game has not been yet deployed on the real network.
- You need an account with some ETH. To get ETH on the test network, you need to use a ETH faucet like at <a href="https://zerogox.com/ethereum/wei_faucet">https://zerogox.com/ethereum/wei_faucet</a>
-</p>
-<p>
-Mist is a browser, so you need to enter the URL to the game in Mist. Then you need to link your account to the current page.
-</p>
-<p>
-Then you can either join a game or create a new one.
-</p>
-<p>
-When enough players have joined, you can start the game!
-</p>
 
+<div id="waiting" class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+    <div class="panel panel-default">
+	  <div class="panel-body">
+	    waiting for the transaction to be processed
+	  </div>
+	</div>
+    </div>
+  </div>
+</div>
 <script src="./app.js"></script>
+<script src="./jsx.js"></script>
+
 </html>

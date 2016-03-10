@@ -35,25 +35,12 @@ contract Kindarisky {
         uint found = 0;
         uint i;
         for(i = nbGames ; i != 0 && found < 10; i--) {
-            if(games[i].state == GameState.CREATED) {
+            if(games[i].state != GameState.DONE) {
                 result[found] = int256(i);
                 found++;
             }
         }
     }
-    
-    function getMyInProgressGames(address me) public returns(int[10] result) {
-        uint found = 0;
-        uint i;
-        
-        for(i = nbGames ; i != 0 && found < 10; i--) {
-            if(games[i].state == GameState.IN_PROGRESS && amIMemberOf(i, me)) {
-                result[found] = int256(i);
-                found++;
-            }
-        }
-    }
-    
 
     function getNumberGames() constant returns(uint) { return nbGames; }
 
@@ -62,6 +49,10 @@ contract Kindarisky {
     function join(uint gameId) public returns (uint){
         if (games[gameId].state != GameState.CREATED) {
             log0("game already started");
+            return;
+        }
+        if(games[gameId].nbPlayers == games[gameId].maxPlayers) {
+            log0("max players reached!");
             return;
         }
         log0("joining game");
@@ -108,11 +99,12 @@ contract Kindarisky {
         return games[gameId].nbPlayers;
     }
 
-    function createGame(uint numRowsMap) public {
+    function createGame(uint numRowsMap, uint maxPlayers) public {
         nbGames++;
         uint gameId = nbGames;
         Game newGame = games[gameId];
         newGame.state = GameState.CREATED;
+        newGame.maxPlayers = maxPlayers;
         join(gameId);
 
         newGame.defaultNumArmy = 5;
