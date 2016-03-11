@@ -55,6 +55,10 @@ contract Kindarisky {
             log0("max players reached!");
             return;
         }
+        if(amIMemberOf(gameId, tx.origin)) {
+            log0("already member of this game!");
+            return;
+        }
         log0("joining game");
         return addPlayerToGame(gameId,tx.origin);
     }
@@ -326,6 +330,16 @@ contract Kindarisky {
         if(winner(gameId) != 0)  {
             games[gameId].state = GameState.DONE;
         }
+    }
+
+    function getMyPlayerId(uint gameId, address me) constant returns (int) {
+        for(uint p = 0 ; p < games[gameId].nbPlayers; ++p) {
+            if(games[gameId].players[p] == me) {
+                return int256(p);
+            }
+        }
+
+        return -1;
     }
     
 } 

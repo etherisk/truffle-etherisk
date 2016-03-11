@@ -1,12 +1,8 @@
-var riskContract;
-var account;
-var button;
-var background;
 var games = {};
 var gameIds = [];
 
 function getContract() {
-  return Kindarisky.at('0x3e6218DC007EF5986C24B9883Fa8B8F843546E51');
+  return Kindarisky.at('0x86A4757cAFf0bfFe41B8c5faa4651de2Ec63ecD9');
 }
 
 function getAvailableGames() {
@@ -40,12 +36,15 @@ function updateGames(reactElement) {
     }
     getContract().getNumberOfPlayers.call(id).then(numP => {
       var numPlayers = parseInt(numP.toString());
-      getContract().amIMemberOf.call(id,account).then(isMember => {
+      getContract().amIMemberOf.call(id,web3.eth.defaultAccount).then(isMember => {
         getContract().getGameState.call(id).then(state => {
           var gameState = parseInt(state.toString());
           currentGame.nbPlayers = numPlayers.toString();
           currentGame.isMember = isMember;
-          currentGame.state=  gameState === 0 ? 'CREATED' : gameState === 1 ? 'IN_PROGRESS' : 'DONE'
+          currentGame.state = gameState === 0 ? 'CREATED' : gameState === 1 ? 'IN_PROGRESS' : 'DONE'
+          getContract().getMyPlayerId(id,web3.eth.defaultAccount).then(playerId => {
+            currentGame.myPlayerId = parseInt(playerId);
+          });
           var gameObjects = gameIds.map(id => games[id]);
           reactElement.setState({
             data: gameObjects
@@ -62,7 +61,7 @@ function FetchGameList(reactElement) {
   // This is called when the Unity app has finished starting up.
   
   getAvailableGames().then(result => {
-    var games = result.map(function(id){
+    var games = result.map(id => {
       return id.toString();
     }).filter(function(id) {
       return id !== "0";
@@ -87,39 +86,4 @@ function CreateGame() {
   getContract().createGame(4,4).then(function() {
     $('#waiting').modal('hide');
   });  
-}
-
-function errorHandling(err){
-  console.error(err);
-}
-
-function UpdatePlayerCount() {
-  getContract().getNumberOfPlayers.call(joinedGameId).then(function(numPlayers) {
-    var status = numPlayers + " joined out of 4";
-  });
-}
-
-// WORLD
-
-var nextCountryId = 0;
-
-function args() {
-  return Array.prototype.join.call(arguments, "/");
-}
-
-function WorldStart() {
-  setTimeout(UpdateCountry, 1000);
-}
-
-function UpdateCountry() {
-  getContract().getArmies.call(joinedGameId, nextCountryId).then(function(armies) {
-    getContract().getOwners.call(joinedGameId, nextCountryId).then(function(owners) {
-      for (var i = 0; i < 16; ++i) {
-        var encoded = args(nextCountryId, "Armies: " + armies[i], owners[i]);
-        
-        nextCountryId = (nextCountryId + 1) % 16;
-      }
-      setTimeout(UpdateCountry, 1000);
-    });
-  });
 }

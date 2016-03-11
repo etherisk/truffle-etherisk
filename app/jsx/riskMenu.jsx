@@ -24,8 +24,10 @@ var RiskMenu = React.createClass({
 var JoinGame = React.createClass({
   joinGame: function(event){
     var game = this.props.data;
-    console.log('join game!');
-    getContract().join(game.id);
+    $('#waiting').modal('show');
+    getContract().join(game.id).then(function(){
+      $('#waiting').modal('hide');
+    });
   },
   render: function(){
     return (

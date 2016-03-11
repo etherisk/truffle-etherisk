@@ -1,10 +1,10 @@
 
 
 // tutorial10.js
-"use strict";
+'use strict';
 
 var RiskMenu = React.createClass({
-  displayName: "RiskMenu",
+  displayName: 'RiskMenu',
 
   loadFromServer: function loadFromServer() {
     return FetchGameList(this);
@@ -20,32 +20,34 @@ var RiskMenu = React.createClass({
   },
   render: function render() {
     return React.createElement(
-      "div",
-      { className: "row" },
+      'div',
+      { className: 'row' },
       React.createElement(RiskTable, { data: this.state.data })
     );
   }
 });
 
 var JoinGame = React.createClass({
-  displayName: "JoinGame",
+  displayName: 'JoinGame',
 
   joinGame: function joinGame(event) {
     var game = this.props.data;
-    console.log('join game!');
-    getContract().join(game.id);
+    $('#waiting').modal('show');
+    getContract().join(game.id).then(function () {
+      $('#waiting').modal('hide');
+    });
   },
   render: function render() {
     return React.createElement(
-      "button",
-      { type: "button", className: "btn btn-default", onClick: this.joinGame },
-      "Join"
+      'button',
+      { type: 'button', className: 'btn btn-default', onClick: this.joinGame },
+      'Join'
     );
   }
 });
 
 var StartGame = React.createClass({
-  displayName: "StartGame",
+  displayName: 'StartGame',
 
   startGame: function startGame(event) {
     var game = this.props.data;
@@ -57,15 +59,15 @@ var StartGame = React.createClass({
   },
   render: function render() {
     return React.createElement(
-      "button",
-      { type: "button", className: "btn btn-default", onClick: this.startGame },
-      "Start"
+      'button',
+      { type: 'button', className: 'btn btn-default', onClick: this.startGame },
+      'Start'
     );
   }
 });
 
 var ContinueGame = React.createClass({
-  displayName: "ContinueGame",
+  displayName: 'ContinueGame',
 
   continueGame: function continueGame(event) {
     var game = this.props.data;
@@ -73,15 +75,15 @@ var ContinueGame = React.createClass({
   },
   render: function render() {
     return React.createElement(
-      "button",
-      { type: "button", className: "btn btn-default", onClick: this.continueGame },
-      "Continue"
+      'button',
+      { type: 'button', className: 'btn btn-default', onClick: this.continueGame },
+      'Continue'
     );
   }
 });
 
 var RiskTable = React.createClass({
-  displayName: "RiskTable",
+  displayName: 'RiskTable',
 
   render: function render() {
     var games = this.props.data.map(function (game) {
@@ -99,31 +101,31 @@ var RiskTable = React.createClass({
       }
 
       return React.createElement(
-        "li",
-        { className: "list-group-item" },
+        'li',
+        { className: 'list-group-item' },
         React.createElement(
-          "b",
+          'b',
           null,
-          "Game ",
+          'Game ',
           game.id
         ),
-        " ",
+        ' ',
         React.createElement(
-          "span",
-          { className: "badge" },
+          'span',
+          { className: 'badge' },
           game.nbPlayers,
-          " out of 4 player(s)"
+          ' out of 4 player(s)'
         ),
         React.createElement(
-          "div",
+          'div',
           null,
           buttons
         )
       );
     });
     return React.createElement(
-      "ul",
-      { "class": "list-group" },
+      'ul',
+      { 'class': 'list-group' },
       games
     );
   }
@@ -139,6 +141,7 @@ var RiskBoard = React.createClass({
   loadFromServer: function loadFromServer() {
     var self = this;
     var game = this.props.data;
+
     getContract().getArmies.call(game.id).then(function (armies) {
       for (var i = 0; i < 16; ++i) {
         $("#army" + i).text(armies[i]);
@@ -157,8 +160,8 @@ var RiskBoard = React.createClass({
     setInterval(this.loadFromServer, 1000);
   },
   getColor: function getColor(id) {
-    var t = id % 4;
-    switch (t) {
+    console.log(parseInt(id));
+    switch (parseInt(id)) {
       case 0:
         return 'label-primary';
       case 1:
@@ -191,7 +194,20 @@ var RiskBoard = React.createClass({
     return React.createElement(
       "div",
       { className: "row" },
-      rows
+      rows,
+      React.createElement(
+        "div",
+        { className: "row" },
+        React.createElement(
+          "div",
+          { className: "well col-md-3" },
+          React.createElement(
+            "div",
+            { className: this.getColor(game.myPlayerId) },
+            "my player color"
+          )
+        )
+      )
     );
   }
 });
