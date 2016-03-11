@@ -2,7 +2,7 @@ var games = {};
 var gameIds = [];
 
 function getContract() {
-  return Kindarisky.at('0x86A4757cAFf0bfFe41B8c5faa4651de2Ec63ecD9');
+  return Kindarisky.at('0xa1654665B36a742F4f55074f8C60c2545C5A4007');
 }
 
 function getAvailableGames() {
