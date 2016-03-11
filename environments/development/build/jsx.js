@@ -133,10 +133,10 @@ var RiskTable = React.createClass({
 
 ReactDOM.render(React.createElement(RiskMenu, null), document.getElementById('content'));
 
-"use strict";
+'use strict';
 
 var RiskBoard = React.createClass({
-  displayName: "RiskBoard",
+  displayName: 'RiskBoard',
 
   loadFromServer: function loadFromServer() {
     var self = this;
@@ -150,8 +150,10 @@ var RiskBoard = React.createClass({
 
     getContract().getOwners.call(game.id).then(function (owners) {
       for (var i = 0; i < 16; ++i) {
+        var amIMember = owners[i] == game.myPlayerId;
+        var countryStyle = amIMember ? 'btn' : 'label';
         $("#country" + i).removeClass();
-        $("#country" + i).addClass('col-md-3 ' + self.getColor(owners[i]));
+        $("#country" + i).addClass('col-md-3 label ' + countryStyle + '-' + self.getColor(owners[i]));
       }
     });
   },
@@ -160,16 +162,15 @@ var RiskBoard = React.createClass({
     setInterval(this.loadFromServer, 1000);
   },
   getColor: function getColor(id) {
-    console.log(parseInt(id));
     switch (parseInt(id)) {
       case 0:
-        return 'label-primary';
+        return 'primary';
       case 1:
-        return 'label-success';
+        return 'success';
       case 2:
-        return 'label-warning';
+        return 'warning';
       case 3:
-        return 'label-info';
+        return 'info';
     }
   },
   render: function render() {
@@ -180,31 +181,90 @@ var RiskBoard = React.createClass({
       for (var j = 0; j < 4; ++j) {
         var id = 4 * i + j;
         countries[j] = React.createElement(
-          "div",
-          { id: 'country' + id, className: "col-md-3" },
-          React.createElement("h4", { id: 'army' + id })
+          'a',
+          { href: '#', id: 'country' + id, className: 'btn ' },
+          React.createElement('h4', { id: 'army' + id }),
+          React.createElement(GameMenu, { data: id })
         );
       }
       rows.push(React.createElement(
-        "div",
-        { className: "row" },
+        'div',
+        { className: 'row' },
         countries
       ));
     }
     return React.createElement(
-      "div",
-      { className: "row" },
+      'div',
+      { className: 'row' },
       rows,
       React.createElement(
-        "div",
-        { className: "row" },
+        'div',
+        { className: 'row' },
         React.createElement(
-          "div",
-          { className: "well col-md-3" },
+          'div',
+          { className: 'well col-md-3' },
           React.createElement(
-            "div",
-            { className: this.getColor(game.myPlayerId) },
-            "my player color"
+            'div',
+            { className: 'label-' + this.getColor(game.myPlayerId) },
+            'my player color'
+          )
+        )
+      )
+    );
+  }
+});
+
+var GameMenu = React.createClass({
+  displayName: 'GameMenu',
+
+  render: function render() {
+    var id = this.props.data;
+    return React.createElement(
+      'div',
+      null,
+      React.createElement(
+        'button',
+        { className: 'btn btn-default dropdown-toggle', type: 'button', id: 'dmenu' + id, 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'true' },
+        '...'
+      ),
+      React.createElement(
+        'ul',
+        { className: 'dropdown-menu', 'aria-labelledby': 'dmenu' + id },
+        React.createElement(
+          'li',
+          null,
+          React.createElement(
+            'a',
+            { href: '#' },
+            'Action'
+          )
+        ),
+        React.createElement(
+          'li',
+          null,
+          React.createElement(
+            'a',
+            { href: '#' },
+            'Another action'
+          )
+        ),
+        React.createElement(
+          'li',
+          null,
+          React.createElement(
+            'a',
+            { href: '#' },
+            'Something else here'
+          )
+        ),
+        React.createElement('li', { role: 'separator', 'class': 'divider' }),
+        React.createElement(
+          'li',
+          null,
+          React.createElement(
+            'a',
+            { href: '#' },
+            'Separated link'
           )
         )
       )

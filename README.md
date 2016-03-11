@@ -12,6 +12,7 @@ Then install the packages
 
 Clone
 -> git clone https://github.com/etherisk/truffle-etherisk.git
+-> git checkout no-unity
 
 Run testrpc:
 -> testrpc
@@ -20,5 +21,18 @@ New terminal:
 -> truffle deploy (redo this after each code change)
 -> truffle serve
 
-Open browser
--> localhost:8080
+You need to install mist browser
+As long as the released version is only the wallet, you need to install the branch version
+See Development version installation for more details
+project at: https://github.com/ethereum/mist
+
+When mist is installed
+-> You need to switch to testnet
+-> You can do that by going to Development -> Network -> Testnet
+
+Then create an account
+-> Go to https://zerogox.com/ethereum/wei_faucet to get ETH
+
+To open the application:
+-> open the page http://localhost:8080
+-> press on the "plus" button to add the current page to the registered dApp
