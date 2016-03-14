@@ -19,7 +19,7 @@ Run testrpc:
 
 New terminal:
 -> truffle deploy (redo this after each code change)
--> truffle serve
+-> truffle serve (if it does not work, try truffle init first)
 
 You need to install mist browser
 As long as the released version is only the wallet, you need to install the branch version
