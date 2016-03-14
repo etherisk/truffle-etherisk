@@ -1,16 +1,21 @@
 // tutorial10.js
 var RiskMenu = React.createClass({
   loadFromServer: function() {
-    return FetchGameList(this);
-    return null;
+    if(this.mounted) {
+      FetchGameList(this);  
+    }
   },
   componentDidMount: function() {
     LoadAccount();
+    this.mounted = true;
     this.loadFromServer();
     setInterval(this.loadFromServer,1000);
   },
   getInitialState: function() {
     return {data: []};
+  },
+  componentWillUnmount: function() {
+    this.mounted = false;
   },
   render: function(){
     return (
@@ -73,18 +78,18 @@ var RiskTable = React.createClass({
       var buttons = [];
       if(game.state === 'CREATED') {
         if(!game.isMember){
-          buttons.push(<JoinGame data={game} />);  
+          buttons.push(<JoinGame data={game} key={game.id + 'join'}/>);  
         }
         if(game.nbPlayers > 1) {
-          buttons.push(<StartGame data={game} />);  
+          buttons.push(<StartGame data={game} key={game.id + 'start'}/>);  
         }
       }
       if(game.state === 'IN_PROGRESS') {
-        buttons.push(<ContinueGame data={game} />);
+        buttons.push(<ContinueGame data={game} key={game.id + 'continue'}/>);
       }
 
       return (
-      <li className="list-group-item">
+      <li className="list-group-item" key={game.id}>
         <b>Game {game.id}</b> <span className="badge">{game.nbPlayers} out of 4 player(s)</span>
         <div>
         {buttons}  
@@ -93,7 +98,7 @@ var RiskTable = React.createClass({
       );
     });
     return (
-    <ul class="list-group">
+    <ul className="list-group">
         {games}
     </ul>
     );

@@ -1,0 +1,15 @@
+.row-game {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display:         flex;
+  flex-wrap: wrap;
+}
+.row-game > [class*='col-'] {
+  display: flex;
+  flex-direction: column;
+}
+
+.country {
+	min-width: 20%;
+}

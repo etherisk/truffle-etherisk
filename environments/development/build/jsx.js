@@ -7,16 +7,21 @@ var RiskMenu = React.createClass({
   displayName: 'RiskMenu',
 
   loadFromServer: function loadFromServer() {
-    return FetchGameList(this);
-    return null;
+    if (this.mounted) {
+      FetchGameList(this);
+    }
   },
   componentDidMount: function componentDidMount() {
     LoadAccount();
+    this.mounted = true;
     this.loadFromServer();
     setInterval(this.loadFromServer, 1000);
   },
   getInitialState: function getInitialState() {
     return { data: [] };
+  },
+  componentWillUnmount: function componentWillUnmount() {
+    this.mounted = false;
   },
   render: function render() {
     return React.createElement(
@@ -90,19 +95,19 @@ var RiskTable = React.createClass({
       var buttons = [];
       if (game.state === 'CREATED') {
         if (!game.isMember) {
-          buttons.push(React.createElement(JoinGame, { data: game }));
+          buttons.push(React.createElement(JoinGame, { data: game, key: game.id + 'join' }));
         }
         if (game.nbPlayers > 1) {
-          buttons.push(React.createElement(StartGame, { data: game }));
+          buttons.push(React.createElement(StartGame, { data: game, key: game.id + 'start' }));
         }
       }
       if (game.state === 'IN_PROGRESS') {
-        buttons.push(React.createElement(ContinueGame, { data: game }));
+        buttons.push(React.createElement(ContinueGame, { data: game, key: game.id + 'continue' }));
       }
 
       return React.createElement(
         'li',
-        { className: 'list-group-item' },
+        { className: 'list-group-item', key: game.id },
         React.createElement(
           'b',
           null,
@@ -125,7 +130,7 @@ var RiskTable = React.createClass({
     });
     return React.createElement(
       'ul',
-      { 'class': 'list-group' },
+      { className: 'list-group' },
       games
     );
   }
@@ -141,20 +146,14 @@ var RiskBoard = React.createClass({
   loadFromServer: function loadFromServer() {
     var self = this;
     var game = this.props.data;
-
-    getContract().getArmies.call(game.id).then(function (armies) {
-      for (var i = 0; i < 16; ++i) {
-        $("#army" + i).text(armies[i]);
-      }
-    });
-
-    getContract().getOwners.call(game.id).then(function (owners) {
-      for (var i = 0; i < 16; ++i) {
-        var amIMember = owners[i] == game.myPlayerId;
-        var countryStyle = amIMember ? 'btn' : 'label';
-        $("#country" + i).removeClass();
-        $("#country" + i).addClass('col-md-3 label ' + countryStyle + '-' + self.getColor(owners[i]));
-      }
+    Promise.all([getContract().getArmies.call(game.id), getContract().getOwners.call(game.id)]).then(function (result) {
+      var armies = result[0];
+      var owners = result[1];
+      game.armies = armies;
+      game.owners = owners;
+      self.setState({
+        data: game
+      });
     });
   },
   componentDidMount: function componentDidMount() {
@@ -180,16 +179,11 @@ var RiskBoard = React.createClass({
       var countries = [];
       for (var j = 0; j < 4; ++j) {
         var id = 4 * i + j;
-        countries[j] = React.createElement(
-          'a',
-          { href: '#', id: 'country' + id, className: 'btn ' },
-          React.createElement('h4', { id: 'army' + id }),
-          React.createElement(GameMenu, { data: id })
-        );
+        countries.push(React.createElement(Country, { key: 'country' + id, game: game, countryId: id, color: this.getColor(game.owners[id]) }));
       }
       rows.push(React.createElement(
         'div',
-        { className: 'row' },
+        { className: 'row-game', key: 'countryrow' + i },
         countries
       ));
     }
@@ -214,60 +208,60 @@ var RiskBoard = React.createClass({
   }
 });
 
+var Country = React.createClass({
+  displayName: 'Country',
+
+  render: function render() {
+    var game = this.props.game;
+    var id = this.props.countryId;
+    var color = this.props.color;
+    var amIMember = game.owners[id] == game.myPlayerId;
+    var countryStyle = amIMember ? 'btn' : 'label';
+    var armies = parseInt(game.armies[id]);
+    if (isNaN(armies)) {
+      armies = 5;
+    }
+    return React.createElement(
+      'div',
+      { key: 'country' + id, className: 'country label ' + countryStyle + '-' + color },
+      React.createElement(
+        'h4',
+        null,
+        armies
+      ),
+      React.createElement(GameMenu, { amIMember: amIMember })
+    );
+  }
+});
+
 var GameMenu = React.createClass({
   displayName: 'GameMenu',
 
   render: function render() {
-    var id = this.props.data;
-    return React.createElement(
+    var amIMember = this.props.amIMember;
+    var buttons = amIMember ? React.createElement(
       'div',
       null,
       React.createElement(
-        'button',
-        { className: 'btn btn-default dropdown-toggle', type: 'button', id: 'dmenu' + id, 'data-toggle': 'dropdown', 'aria-haspopup': 'true', 'aria-expanded': 'true' },
-        '...'
+        'div',
+        { className: 'btn btn-default' },
+        'attack'
       ),
       React.createElement(
-        'ul',
-        { className: 'dropdown-menu', 'aria-labelledby': 'dmenu' + id },
-        React.createElement(
-          'li',
-          null,
-          React.createElement(
-            'a',
-            { href: '#' },
-            'Action'
-          )
-        ),
-        React.createElement(
-          'li',
-          null,
-          React.createElement(
-            'a',
-            { href: '#' },
-            'Another action'
-          )
-        ),
-        React.createElement(
-          'li',
-          null,
-          React.createElement(
-            'a',
-            { href: '#' },
-            'Something else here'
-          )
-        ),
-        React.createElement('li', { role: 'separator', 'class': 'divider' }),
-        React.createElement(
-          'li',
-          null,
-          React.createElement(
-            'a',
-            { href: '#' },
-            'Separated link'
-          )
-        )
+        'div',
+        { className: 'btn btn-default' },
+        'move'
+      ),
+      React.createElement(
+        'div',
+        { className: 'btn btn-default' },
+        'reinforcement'
       )
+    ) : React.createElement('div', null);
+    return React.createElement(
+      'div',
+      null,
+      buttons
     );
   }
 });

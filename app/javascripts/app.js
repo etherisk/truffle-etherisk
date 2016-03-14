@@ -42,6 +42,8 @@ function updateGames(reactElement) {
           currentGame.nbPlayers = numPlayers.toString();
           currentGame.isMember = isMember;
           currentGame.state = gameState === 0 ? 'CREATED' : gameState === 1 ? 'IN_PROGRESS' : 'DONE'
+          currentGame.armies = [];
+          currentGame.owners = [];
           getContract().getMyPlayerId(id,web3.eth.defaultAccount).then(playerId => {
             currentGame.myPlayerId = parseInt(playerId);
           });
