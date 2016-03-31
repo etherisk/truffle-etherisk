@@ -11,8 +11,7 @@
       "stylesheets/app.css"
     ],
     "jsx.js": [
-      "jsx/riskMenu.jsx",
-      "jsx/riskGame.jsx"
+      "jsx/ethclassify.jsx"
     ],
     "assets/" : "assets/"
   },
