@@ -58,28 +58,58 @@ var Country = React.createClass({
     var id = this.props.countryId;
     var color = this.props.color;
     var amIMember = game.owners[id] == game.myPlayerId;
-    var countryStyle = amIMember ? 'btn' : 'label'
     var armies = parseInt(game.armies[id]);
     if(isNaN(armies)) {
       armies = 5;
     }
     return (
-      <div key={'country' + id} className={'country label ' + countryStyle + '-' + color}>
+      <div key={'country' + id} className={'country label label-' + color}>
           <h4>{armies}</h4>
-          <GameMenu amIMember={amIMember}/>
+          <GameMenu amIMember={amIMember} id={id} armies={armies} gameId={game.id}/>
       </div>
     );
   }
 });
 
 var GameMenu = React.createClass({
+  attack: function(from, to, gameId, armies){
+    var result = $('#attack' + from).popover({
+      content: '<div class="row center-block">'+ 
+      '<div class="btn btn-primary" onclick="attack()">&#x2191;</div>' +
+      '</div><div class="row">' + 
+      '<div class="btn btn-primary">&#8592;</div>' + 
+      '<div class="btn btn-primary">&#x2193;</div>' + 
+      '<div class="btn btn-primary">&#x2192;</div></div>',
+      html: true
+    });
+  },
+  move: function(from, to, gameId, armies) {
+    var result = $('#move' + from).popover({
+      content: '<div class="row center-block">'+ 
+      '<div class="btn btn-primary" onclick="move()">&#x2191;</div>' +
+      '</div><div class="row">' + 
+      '<div class="btn btn-primary">&#8592;</div>' + 
+      '<div class="btn btn-primary">&#x2193;</div>' + 
+      '<div class="btn btn-primary">&#x2192;</div></div>',
+      html: true
+    });
+  },
+  reinforcement: function(id) {
+    var result = $('#reinforcement' + id).popover({
+      content: '<div class="btn btn-primary" onclick="reinforcement()">reinforcement!</div>',
+      html: true
+    });
+  },
   render: function(){
+    var id = this.props.id;
     var amIMember = this.props.amIMember;
+    var armies = this.props.armies;
+    var gameId = this.props.gameId;
     var buttons = amIMember ? (
   <div>   
-      <div className="btn btn-default">attack</div>
-      <div className="btn btn-default">move</div>
-      <div className="btn btn-default">reinforcement</div>
+      <div className="btn btn-default" id={'attack' + id} onClick={this.attack(id,gameId, armies)}>attack</div>
+      <div className="btn btn-default" id={'move' + id} onClick={this.move(id, gameId, armies)}>move</div>
+      <div className="btn btn-default" id={'reinforcement' + id} onClick={this.reinforcement(id)}>reinforcement</div>
   </div>) : (<div></div>);
   return (
   <div>

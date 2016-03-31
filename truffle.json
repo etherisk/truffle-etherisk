@@ -13,8 +13,7 @@
     "jsx.js": [
       "jsx/riskMenu.jsx",
       "jsx/riskGame.jsx"
-    ],
-    "assets/" : "assets/"
+    ]
   },
   "deploy": [
     "Kindarisky"

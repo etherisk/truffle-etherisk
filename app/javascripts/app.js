@@ -19,6 +19,12 @@ function LoadAccount() {
   });
 }
 
+function Attack(gameId, from, to, armies) {
+  if(armies > 1) {
+    getContract().attack(gameId, from, to, armies - 1);  
+  }
+}
+
 function removeOldGames(oldGames) {
   gameIds = gameIds.filter( el => {
     return oldGames.indexOf( el ) < 0;
